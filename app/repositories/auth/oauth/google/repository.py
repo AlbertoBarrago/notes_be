@@ -47,7 +47,7 @@ def get_info_from_google(token):
         response.raise_for_status()
 
         user_info = response.json()
-        logger.debug("Google API Response: %s", {user_info})
+        logger.debug("Google API Response: %s", user_info)
 
         return {
             "email": user_info.get('email'),
