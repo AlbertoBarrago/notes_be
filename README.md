@@ -27,8 +27,8 @@ pytest -p no:warnings test/**/*.py
 - `MYSQL_PORT`
 - `MYSQL_DATABASE`
 - `SECRET_KEY`
-  - if you have a demon on machine on port 3306 you need to change the port in the docker-compose.yml file
-- If you want to rebuild the image you need to run the following commands:
+  - if you have a demon on machine on port 3306, you need to change the port in the docker-compose.yml file
+- If you want to rebuild the image, you need to run the following commands:
   - `docker-compose down`
   - `docker-compose up --build`
 
@@ -37,7 +37,7 @@ pytest -p no:warnings test/**/*.py
  - [x] Improve Error Handling
  - [x] Audit action notes and auth 
  - [x] Check import
- - [x] Add home API for Welcome localhost:/
+ - [x] Add home API for Welcome localhost:/ 
  - [ ] Add BackOffice API (get_users, get_notes, get_audit)
 
 
@@ -48,4 +48,9 @@ pytest -p no:warnings test/**/*.py
  - `alembic upgrade head`
 
 ## N.B.
-Please if you don't find some requirements, or have some problem during installing steps; Send me a PM. I really appreciate ♥️
+
+- Please, if you don't find some requirements, or have some problem during installing steps; Send me a PM.
+  I really appreciate ♥️
+
+- This project is evaluated by Cody 23k. 👍
+

@@ -10,7 +10,7 @@ from sqlalchemy.sql.elements import or_
 from app.core.exceptions.auth import AuthErrorHandler
 from app.core.exceptions.note import NoteErrorHandler
 from app.db.models import Note, User
-from app.dto.note.noteDTO import NoteDTO
+from app.dto.note.note_dto import NoteDTO
 from app.repositories.audit.repository import log_audit_event
 from app.repositories.logger.repository import LoggerService
 
