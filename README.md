@@ -27,8 +27,8 @@ pytest -p no:warnings test/**/*.py
 - `MYSQL_PORT`
 - `MYSQL_DATABASE`
 - `SECRET_KEY`
-  - if you have a demon on machine on port 3306 you need to change the port in the docker-compose.yml file
-- If you want to rebuild the image you need to run the following commands:
+  - if you have a demon on machine on port 3306, you need to change the port in the docker-compose.yml file
+- If you want to rebuild the image, you need to run the following commands:
   - `docker-compose down`
   - `docker-compose up --build`
 
