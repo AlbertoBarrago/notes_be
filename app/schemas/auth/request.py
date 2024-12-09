@@ -10,7 +10,7 @@ class OauthRequest(BaseModel):
     """
     Oauth Request Model
     """
-    clientId: str
+    client_id: str
     credential: str
 
 

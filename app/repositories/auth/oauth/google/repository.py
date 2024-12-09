@@ -4,7 +4,6 @@
 import secrets
 
 import requests
-from starlette.responses import JSONResponse
 
 from app.core import generate_user_token
 from app.core.exceptions.auth import AuthErrorHandler
@@ -20,33 +19,45 @@ logger = LoggerService().logger
 
 def get_info_from_google(token):
     """
-    Get info from Google
-    :param token:
-    :return:
+    Fetches user information from Google using an OAuth2 token.
+
+    This function sends a request to the Google API to retrieve the user's
+    information based on the provided OAuth2 token.
+    It returns a dictionary containing the user's email, name, and profile picture URL.
+    If an error occurs during the API request, it logs the error and triggers an
+    authorization error handler.
+
+    Parameters:
+        token (str): OAuth2 token used for authorization to access Google user
+        information.
+
+    Returns:
+        dict: A dictionary with keys 'email', 'name', and 'picurl' corresponding
+        to the user's email, full name, and profile picture URL respectively.
+
+    Raises:
+        AuthErrorHandler: If a RequestException occurs during the API call,
+        indicating unauthorized access or other request failures.
     """
-    response = None
-    if not token:
-        return JSONResponse(content={"error": "Token not present"}, status_code=400)
-
-    google_url = f'https://oauth2.googleapis.com/tokeninfo?id_token={token}'
-
     try:
-        response = requests.get(google_url, timeout=5)
-        response.raise_for_status()
-    except requests.RequestException:
-        AuthErrorHandler.raise_unauthorized()
+        userinfo_url = 'https://www.googleapis.com/oauth2/v3/userinfo'
+        headers = {'Authorization': f'Bearer {token}'}
 
-    user_info = response.json()
-    email = user_info.get('email')
-    name = user_info.get('name')
-    picurl = user_info.get('picture')
-    if not email or not name:
+        response = requests.get(userinfo_url, headers=headers, timeout=5)
+        response.raise_for_status()
+
+        user_info = response.json()
+        logger.debug("Google API Response: %s", user_info)
+
+        return {
+            "email": user_info.get('email'),
+            "name": user_info.get('name'),
+            "picurl": user_info.get('picture')
+        }
+    except requests.RequestException as e:
+        logger.error("Google API Error: %s", {str(e)})
         AuthErrorHandler.raise_unauthorized()
-    return {
-        "email": email,
-        "name": name,
-        "picurl": picurl
-    }
+        return None
 
 
 def get_user_info(db, request):
