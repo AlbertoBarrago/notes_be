@@ -4,6 +4,7 @@
 from fastapi.staticfiles import StaticFiles
 
 from app.api.v1.endpoints import (
+    healthcheck_router,
     auth_router,
     notes_router,
     users_router,
@@ -15,9 +16,10 @@ from app.core.setup import create_app
 app = create_app()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
+app.include_router(healthcheck_router, tags=["Healthcheck"])
 app.include_router(home_router, tags=["home"])
 app.include_router(
-    auth_router, prefix="/api/v1", tags=["Auth"])
+    auth_router, prefix="/api/v1", tags=["Authorization"])
 app.include_router(
     oauth_router, prefix="/api/v1", tags=["OAuth"])
 app.include_router(
