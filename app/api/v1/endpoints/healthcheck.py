@@ -7,7 +7,7 @@ from fastapi.responses import JSONResponse
 router = APIRouter()
 
 
-@router.get("/healthcheck", include_in_schema=True)
+@router.get("/healthcheck", include_in_schema=False)
 async def healthcheck():
     """
     Perform a health check to determine if the service is running correctly.
