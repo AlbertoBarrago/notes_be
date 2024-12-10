@@ -36,7 +36,7 @@ def login_google(request: OauthRequest,
              responses={**CommonResponses.BAD_REQUEST,
                         **CommonResponses.UNAUTHORIZED,
                         **CommonResponses.MAIL_NOT_SENT})
-def register_from_google(request: OauthRequest,
+async def register_from_google(request: OauthRequest,
                          background_tasks: BackgroundTasks,
                          db: Session = Depends(get_db)):
     """
@@ -46,4 +46,4 @@ def register_from_google(request: OauthRequest,
     :param db:
     :return: Token
     """
-    return add_user_to_db(db, request, background_tasks)
+    return await add_user_to_db(db, request, background_tasks)

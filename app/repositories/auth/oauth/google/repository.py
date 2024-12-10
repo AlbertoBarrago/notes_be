@@ -4,6 +4,8 @@
 import secrets
 
 import requests
+from pymysql.err import MySQLError
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.core import generate_user_token
 from app.core.exceptions.auth import AuthErrorHandler
@@ -98,46 +100,54 @@ async def add_user_to_db(db, request, background_tasks):
     :param background_tasks:
     :return:
     """
-    result = None
-    user_from_google = get_info_from_google(request.credential)
+    try:
 
-    existing_user = db.query(User).filter(User.email == user_from_google['email']).first()
+        result = None
+        user_from_google = get_info_from_google(request.credential)
 
-    if existing_user:
-        AuthErrorHandler.raise_existing_user_error()
+        existing_user = db.query(User).filter(User.email == user_from_google['email']).first()
 
-    if not existing_user:
-        temp_password = secrets.token_urlsafe(32)
-        user = User(
-            email=user_from_google['email'],
-            username=user_from_google['name'],
-            picture_url=user_from_google['picurl'],
-        )
-        user.set_password(temp_password)
-        db.add(user)
-        db.commit()
-        db.refresh(user)
+        if existing_user:
+            AuthErrorHandler.raise_existing_user_error()
 
-        user_fetched = db.query(User).filter(User.email == user_from_google['email']).first()
-        log_audit_event(db,
-                        user_id=user_fetched.user_id,
-                        action="Google Registered",
-                        description="Registered user By Google")
-        logger.info("User %s registered", user_fetched.user_id)
+        if not existing_user:
+            temp_password = secrets.token_urlsafe(32)
+            user = User(
+                email=user_from_google['email'],
+                username=user_from_google['name'],
+                picture_url=user_from_google['picurl'],
+            )
+            user.set_password(temp_password)
+            db.add(user)
+            db.commit()
+            db.refresh(user)
 
-        token = generate_user_token(user_fetched)
+            user_fetched = db.query(User).filter(User.email == user_from_google['email']).first()
+            log_audit_event(db,
+                            user_id=user_fetched.user_id,
+                            action="Google Registered",
+                            description="Registered user By Google")
 
-        try:
+            token = generate_user_token(user_fetched)
+
+            result = {
+                "access_token": token,
+                "token_type": "bearer",
+                "user": user_fetched
+            }
+
             await CommonService().send_email(background_tasks=background_tasks,
-                                     token=token,
-                                     user=user)
-        except (ConnectionError, TimeoutError):
-            GlobalErrorHandler.raise_mail_not_sent()
-            return None
+                                             token=token,
+                                             user=user)
 
-        result = {
-            "access_token": token,
-            "token_type": "bearer",
-            "user": user_fetched
-        }
-    return result
+            return result
+    except SQLAlchemyError as e:
+        logger.error("Error adding user to database: %s", str(e))
+        GlobalErrorHandler.raise_internal_server_error(str(e))
+    except MySQLError as e:
+        logger.error("MySQL error: %s", str(e))
+        GlobalErrorHandler.raise_internal_server_error(str(e))
+    except ValueError as e:
+        logger.error("Validation error: %s", str(e))
+        GlobalErrorHandler.raise_internal_server_error(str(e))
+        return None
