@@ -3,7 +3,6 @@ User actions
 """
 from datetime import datetime
 
-import jwt
 from fastapi import HTTPException
 from pydantic.v1 import EmailStr
 from sqlalchemy import or_
@@ -49,7 +48,7 @@ class UserManager:
             log_audit_event(self.db, user_id=user_id, action=action, description=description)
         except Exception as e:
             self.db.rollback()
-            raise UserErrorHandler.raise_server_error(e.args[0])
+            UserErrorHandler.raise_server_error(e.args[0])
 
     def _reset_password_with_token(self, token: str, new_password: str):
         """
@@ -59,20 +58,27 @@ class UserManager:
         :return: a Success message with user info
         """
         try:
+            logger.debug("Starting password reset with token")
             payload = decode_access_token(token)
+            logger.debug("Token payload: %s", payload)
+
             if not payload:
-                raise HTTPException(status_code=400, detail="Invalid or expired token")
+                raise HTTPException(status_code=400, detail="Invalid token")
 
-            return self.reset_password(
-                user_username=payload,
-                new_password=new_password
-            )
+            user = self._get_user(username=payload)
+            if not user:
+                logger.error("User not found with payload: %s", payload)
+                UserErrorHandler.raise_user_not_found()
 
-        except jwt.exceptions.PyJWTError as e:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Could not validate token, {e}"
-            ) from e
+            user.set_password(new_password)
+            self.db.commit()
+
+            return {"message": "Password reset successful"}
+
+        except IndexError as e:
+            logger.error("Index error during password reset: %s", str(e))
+            UserErrorHandler.raise_server_error(e.args[0])
+            return None
 
     def _generate_user_token_and_return_user(self, current_user):
         """
@@ -174,7 +180,7 @@ class UserManager:
             return [UserDTO.from_model(user) for user in users]
         except Exception as e:
             self.db.rollback()
-            raise UserErrorHandler.raise_server_error(e.args[0])
+            return UserErrorHandler.raise_server_error(e.args[0])
 
     def update_user(self, current_user, user_data):
         """
@@ -203,7 +209,7 @@ class UserManager:
                     'message': "Updated user information"}
         except Exception as e:
             self.db.rollback()
-            raise UserErrorHandler.raise_server_error(e.args[0])
+            return UserErrorHandler.raise_server_error(e.args[0])
 
     def delete_user(self, current_user):
         """
@@ -228,8 +234,7 @@ class UserManager:
 
         except Exception as e:
             self.db.rollback()
-            raise UserErrorHandler.raise_server_error(e.args[0])
-        return None
+            return UserErrorHandler.raise_server_error(e.args[0])
 
     async def perform_action_user(self, action: str, user=None, current_user=None, **kwargs):
         """
@@ -257,4 +262,4 @@ class UserManager:
             return await actions[action]() if action == "register_user" else actions[action]()
         except Exception as e:
             self.db.rollback()
-            raise UserErrorHandler.raise_server_error(e.args[0])
+            return UserErrorHandler.raise_server_error(str(e))
