@@ -40,15 +40,15 @@ class UserManager:
                     User.email == username)).first()
         except Exception as e:
             self.db.rollback()
-            raise UserErrorHandler.raise_server_error(e.args[0])
+            raise UserErrorHandler.raise_server_error(str(e))
 
     def _log_action(self, user_id, action, description):
         try:
             logger.info("User %s %s %s", user_id, action, description)
             log_audit_event(self.db, user_id=user_id, action=action, description=description)
-        except Exception as e:
+        except IndexError as e:
             self.db.rollback()
-            UserErrorHandler.raise_server_error(e.args[0])
+            UserErrorHandler.raise_server_error(str(e))
 
     def _reset_password_with_token(self, token: str, new_password: str):
         """
@@ -65,7 +65,7 @@ class UserManager:
             if not payload:
                 raise HTTPException(status_code=400, detail="Invalid token")
 
-            user = self._get_user(username=payload)
+            user = self._get_user(user_id=payload)
             if not user:
                 logger.error("User not found with payload: %s", payload)
                 UserErrorHandler.raise_user_not_found()
@@ -178,7 +178,7 @@ class UserManager:
 
             self._log_action(current_user.user_id, "Get users", "Get users")
             return [UserDTO.from_model(user) for user in users]
-        except Exception as e:
+        except IndexError as e:
             self.db.rollback()
             return UserErrorHandler.raise_server_error(e.args[0])
 
@@ -207,7 +207,7 @@ class UserManager:
 
             return {'user': UserDTO.from_model(user),
                     'message': "Updated user information"}
-        except Exception as e:
+        except IndexError as e:
             self.db.rollback()
             return UserErrorHandler.raise_server_error(e.args[0])
 
@@ -232,9 +232,10 @@ class UserManager:
                 self.db.commit()
                 return {"message": "User deleted successfully"}
 
-        except Exception as e:
+        except IndexError as e:
             self.db.rollback()
-            return UserErrorHandler.raise_server_error(e.args[0])
+            return UserErrorHandler.raise_server_error(str(e))
+        return None
 
     async def perform_action_user(self, action: str, user=None, current_user=None, **kwargs):
         """
@@ -260,6 +261,6 @@ class UserManager:
             }
 
             return await actions[action]() if action == "register_user" else actions[action]()
-        except Exception as e:
+        except IndexError as e:
             self.db.rollback()
             return UserErrorHandler.raise_server_error(str(e))

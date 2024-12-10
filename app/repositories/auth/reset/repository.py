@@ -113,7 +113,7 @@ class PasswordManager:
             return {"message": "If the email exists, a password reset link has been sent"}
 
         reset_token = create_access_token(
-            data={"sub": user.username, "purpose": "password_reset"},
+            data={"sub": user.user_id, "purpose": "password_reset"},
             expires_delta=timedelta(minutes=15)
         )
 
