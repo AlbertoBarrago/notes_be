@@ -17,7 +17,9 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None) -> s
     :return: encoded_jwt
     """
     to_encode = data.copy()
-    expire = datetime.now() + (expires_delta or timedelta(minutes=15))
+    expire = datetime.now() + (expires_delta or timedelta(
+        minutes=int(settings.TOKEN_EXPIRES_MINUTES)
+    ))
     to_encode.update({"exp": expire, "sub": data.get("sub")})
     encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     return encoded_jwt
@@ -46,7 +48,7 @@ def generate_user_token_and_return_user(user):
     :param user:
     :return: access_token
     """
-    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token_expires = timedelta(minutes=int(settings.TOKEN_REFRESH_EXPIRES_MINUTES))
     access_token = create_access_token(
         data={"sub": str(user.user_id)},
         expires_delta=access_token_expires
@@ -63,7 +65,7 @@ def generate_user_token(user):
     :param user:
     :return: access_token
     """
-    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token_expires = timedelta(minutes=int(settings.TOKEN_REFRESH_MINUTES))
     return create_access_token(
         data={"sub": str(user.user_id)},
         expires_delta=access_token_expires
