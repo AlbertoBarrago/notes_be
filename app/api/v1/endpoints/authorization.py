@@ -9,7 +9,10 @@ from app.db.mysql import get_db, get_current_user
 from app.repositories.auth.login.repository import LoginManager
 from app.repositories.auth.reset.repository import PasswordManager
 from app.repositories.user.repository import UserManager
-from app.schemas.auth.request import TokenRequest, TokenResponse, ResetRequest, ResetUserEmail
+from app.schemas.authorization.request import (TokenRequest,
+                                               TokenResponse,
+                                               ResetRequest,
+                                               ResetUserEmail)
 from app.schemas.common.responses import CommonResponses
 from app.schemas.user.request import ResetPswRequest
 

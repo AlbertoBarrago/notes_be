@@ -127,7 +127,7 @@ class EmailService:
                    </div>
 
                    <p style="color: #ff6b6b; font-size: 14px; text-align: center;">
-                       ⚠️ This link will expire in 24 hours
+                       ⚠️ This link will expire in 15 minutes.
                    </p>
 
                    <p style="color: #555; font-size: 16px; line-height: 1.5;">

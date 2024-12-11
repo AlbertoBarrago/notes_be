@@ -41,10 +41,9 @@ class LoginManager:
         if not oauth and not user.verify_password(request.password):
             AuthErrorHandler.raise_invalid_credentials()
 
-        action_name = f"${len('login') > 0 and 'login' or 'Login'}"
         self._log_action(
             user_id=user.user_id,
-            action=action_name,
+            action="Login",
             description="User logged in successfully"
         )
 
@@ -72,7 +71,7 @@ class LoginManager:
 
     def perform_action_auth(self, action: str, request=None, **kwargs):
         """
-        Perform action auth
+        Perform action authorization
         :param action:
         :param request:
         :param kwargs:

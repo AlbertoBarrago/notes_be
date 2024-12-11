@@ -19,7 +19,6 @@ class Settings(BaseSettings):
     MYSQL_DATABASE: str = os.getenv("MYSQL_DATABASE")
     SECRET_KEY: str = "8d0f39701a43810766d0c9fa25acd6f0097dff05c2d0322d8983969c88c81bd8"
     ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     GOOGLE_CLIENT_ID: str = os.getenv("GOOGLE_CLIENT_ID")
     GOOGLE_SECRET_KEY: str = os.getenv("GOOGLE_SECRET_KEY")
     RATE_LIMIT: int = 1000
@@ -32,10 +31,15 @@ class Settings(BaseSettings):
     FRONTEND_URL: str = os.getenv("FRONTEND_URL")
     CORS_ORIGINS: str = os.getenv("CORS_ORIGINS",
                                   "http://localhost:5173")
+    TOKEN_EXPIRES_MINUTES: str = os.getenv("EXPIRES_MINUTES", str(15))
+    TOKEN_REFRESH_MINUTES: str = os.getenv("REFRESH_MINUTES", str(60))
+    TOKEN_REFRESH_EXPIRES_MINUTES: str = os.getenv("REFRESH_EXPIRES_MINUTES", str(1440))
+    TOKEN_REFRESH_EXPIRES_SECONDS: str = (
+            TOKEN_REFRESH_MINUTES * 60
+    )
     CACHE_CONFIG = {
         "MAXSIZE": 128,
         "TTL": 300  # 5 minutes in seconds
     }
-
 
 settings = Settings()

@@ -14,7 +14,7 @@ from app.db.models import User
 from app.repositories.audit.repository import log_audit_event
 from app.repositories.auth.common.services import CommonService
 from app.repositories.logger.repository import LoggerService
-from app.schemas.auth.request import TokenRequest
+from app.schemas.authorization.request import TokenRequest
 
 logger = LoggerService().logger
 
