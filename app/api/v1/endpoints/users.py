@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 from app.db.models import User
 from app.db.mysql import get_db, get_current_user
 from app.repositories.user.repository import UserManager
-from app.schemas.auth.request import TokenResponse
+from app.schemas.authorization.request import TokenResponse
 from app.schemas.common.responses import CommonResponses
 from app.schemas.user.request import UserOut, UserBase, UserRequestAdd, UserResponse, UserDelete
 

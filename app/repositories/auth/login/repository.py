@@ -72,7 +72,7 @@ class LoginManager:
 
     def perform_action_auth(self, action: str, request=None, **kwargs):
         """
-        Perform action auth
+        Perform action authorization
         :param action:
         :param request:
         :param kwargs:

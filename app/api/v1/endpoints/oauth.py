@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 from app.db.mysql import get_db
 from app.repositories.auth.login.repository import LoginManager
 from app.repositories.auth.oauth.google.repository import get_user_info, add_user_to_db
-from app.schemas.auth.request import TokenResponse, OauthRequest
+from app.schemas.authorization.request import TokenResponse, OauthRequest
 from app.schemas.common.responses import CommonResponses
 
 router = APIRouter()
