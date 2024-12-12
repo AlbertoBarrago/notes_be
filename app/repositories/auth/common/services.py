@@ -7,6 +7,7 @@ from pydantic.v1 import EmailStr
 from app.core.exceptions.generic import GlobalErrorHandler
 from app.db.models import User
 from app.email.email_service import EmailService, EmailSchema
+from app.repositories.audit.repository import log_audit_event
 from app.repositories.logger.repository import LoggerService
 
 logger = LoggerService().logger
@@ -64,3 +65,13 @@ class CommonService:
                 .filter((User.username == username) |
                         (User.email == username))
                 .first())
+
+    def log_action(self, user_id, action, description):
+        """
+        Log action
+        :param user_id:
+        :param action:
+        :param description:
+        """
+        logger.info("User %s %s %s", user_id, action, description)
+        log_audit_event(self.db, user_id=user_id, action=action, description=description)

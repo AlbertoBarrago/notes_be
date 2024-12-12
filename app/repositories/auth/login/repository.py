@@ -3,7 +3,6 @@ Session actions
 """
 from app.core.exceptions.auth import AuthErrorHandler
 from app.core.security import generate_user_token_and_return_user
-from app.repositories.audit.repository import log_audit_event
 from app.repositories.auth.common.services import CommonService
 from app.repositories.logger.repository import LoggerService
 
@@ -15,16 +14,6 @@ class LoginManager:
     """
     def __init__(self, db):
         self.db = db
-
-    def _log_action(self, user_id, action, description):
-        """
-        Log action
-        :param user_id:
-        :param action:
-        :param description:
-        """
-        logger.info("User %s %s %s", user_id, action, description)
-        log_audit_event(self.db, user_id=user_id, action=action, description=description)
 
     def login(self, request, oauth=False):
         """
@@ -41,7 +30,7 @@ class LoginManager:
         if not oauth and not user.verify_password(request.password):
             AuthErrorHandler.raise_invalid_credentials()
 
-        self._log_action(
+        CommonService(self.db).log_action(
             user_id=user.user_id,
             action="Login",
             description="User logged in successfully"
@@ -61,7 +50,7 @@ class LoginManager:
         if not user or not user.verify_password(password):
             AuthErrorHandler.raise_invalid_credentials()
 
-        self._log_action(
+        CommonService.log_action(
             user_id=user.user_id,
             action="Login",
             description="Logged from swagger"
