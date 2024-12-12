@@ -11,7 +11,6 @@ from app.core import generate_user_token
 from app.core.exceptions.auth import AuthErrorHandler
 from app.core.exceptions.generic import GlobalErrorHandler
 from app.db.models import User
-from app.repositories.audit.repository import log_audit_event
 from app.repositories.auth.common.services import CommonService
 from app.repositories.logger.repository import LoggerService
 from app.schemas.authorization.request import TokenRequest
@@ -49,7 +48,6 @@ def get_info_from_google(token):
         response.raise_for_status()
 
         user_info = response.json()
-        logger.debug("Google API Response: %s", user_info)
 
         return {
             "email": user_info.get('email'),
@@ -86,8 +84,11 @@ def get_user_info(db, request):
 
     request = TokenRequest(username=user_from_google['name'])
 
-    log_audit_event(db, user_id=user.user_id, action="login", description="Login from Google")
-    logger.info("User %s login from Google", user.user_id)
+    CommonService(db).log_action(
+        user_id=user.user_id,
+        action="Login",
+        description="Login from Google"
+    )
 
     return request
 
@@ -123,10 +124,11 @@ async def add_user_to_db(db, request, background_tasks):
             db.refresh(user)
 
             user_fetched = db.query(User).filter(User.email == user_from_google['email']).first()
-            log_audit_event(db,
-                            user_id=user_fetched.user_id,
-                            action="Google Registered",
-                            description="Registered user By Google")
+            CommonService.log_action(
+                user_id=user_fetched.user_id,
+                action="Google Registered",
+                description="Registered user By Google"
+            )
 
             token = generate_user_token(user_fetched)
 

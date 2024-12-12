@@ -6,6 +6,7 @@ from typing import Any
 
 from app.core import settings
 from app.repositories.audit.repository import log_audit_event
+from app.repositories.auth.common.services import CommonService
 from app.repositories.logger.repository import LoggerService
 from app.repositories.note.repository import NoteManager
 
@@ -32,10 +33,30 @@ class CacheRepository:
     @lru_cache(maxsize=settings.CACHE_CONFIG["MAXSIZE"])
     def get_public_notes(self, current_user, page: int, page_size: int,
                          search_query: str, sort_by: str, sort_order: str = 'desc') -> Any:
-        """Cache layer for public notes"""
-        self._log_action(current_user.user_id,
-                         'fetch data from cache',
-                         'Get Public Notes from Cache')
+        """
+        Retrieves public notes from cache or database storage.
+
+        This function leverages caching to retrieve public notes efficiently. It accepts
+        parameters for pagination and searching, and returns a list of public notes.
+        It also logs the action of fetching data from the cache.
+
+        Args:
+            current_user (Any): The current logged-in user requiring access to public notes.
+            page (int): The page number in the paginated list of notes.
+            page_size (int): The number of notes per page in the results.
+            search_query (str): The query string used to filter the notes by keywords.
+            sort_by (str): The field by which the notes are sorted.
+            sort_order (str, optional): Indicates the sorting direction, either 'asc'
+                                        or 'desc'. Defaults to 'desc'.
+
+        Returns:
+            Any: A list of notes retrieved based on the specified parameters.
+        """
+        CommonService(self.db).log_action(
+            user_id=current_user.user_id,
+            action='Fetch from cache',
+            description='Get Public Notes from Cache'
+        )
         return NoteManager(self.db).get_explore_notes(
             current_user, page, page_size, search_query, sort_by, sort_order
         )
@@ -43,8 +64,37 @@ class CacheRepository:
     @lru_cache(maxsize=settings.CACHE_CONFIG["MAXSIZE"])
     def get_note_paginated(self, current_user, page: int, page_size: int,
                            search_query: str, sort_by: str, sort_order: str = 'desc') -> Any:
-        """Cache layer for paginated notes"""
-        self._log_action(current_user.user_id, 'fetch data from cache', 'Get Notes from Cache')
+        """
+        A method to retrieve paginated notes, utilizing caching for enhanced
+        performance to prevent repetitive database queries. It accepts
+        various parameters to customize pagination, filtering, and sorting.
+        Logs the action of fetching notes using a common service.
+
+        Parameters:
+            current_user
+                The currently authenticated user, whose information is utilized
+                for note fetching and authorization.
+            page: int
+                Page number for pagination.
+            page_size: int
+                Number of notes to display per page.
+            search_query: str
+                The search query string to filter the notes.
+            sort_by: str
+                Column or field name on which sorting is to be applied.
+            sort_order: str
+                Sort order for the notes. Possible values are 'asc' for ascending
+                and 'desc' for descending. Defaults to 'desc'.
+
+        Returns:
+            Any
+                The paginated list of notes along with relevant metadata.
+        """
+        CommonService(self.db).log_action(
+            user_id=current_user.user_id,
+            action='Fetch from cache',
+            description='Get Notes from Cache'
+        )
         return NoteManager(self.db).get_note_paginated(
             current_user, page, page_size, search_query, sort_by, sort_order
         )

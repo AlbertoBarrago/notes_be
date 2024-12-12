@@ -11,7 +11,7 @@ from app.core.exceptions.auth import AuthErrorHandler
 from app.core.exceptions.note import NoteErrorHandler
 from app.db.models import Note, User
 from app.dto.note.note_dto import NoteDTO
-from app.repositories.audit.repository import log_audit_event
+from app.repositories.auth.common.services import CommonService
 from app.repositories.logger.repository import LoggerService
 
 logger = LoggerService().logger
@@ -25,20 +25,6 @@ class NoteManager:
     def __init__(self, db):
         self.db = db
 
-    def _log_action(self, user_id: str, action: str, description: str):
-        """
-        Log audit event and log to file
-        :param user_id:
-        :param action:
-        :param description:
-        :return: None
-        """
-        try:
-            logger.info("User %s %s %s", user_id, action, description)
-            log_audit_event(self.db, user_id=user_id, action=action, description=description)
-        except Exception as e:
-            logger.error("Error while logging action: %s", e)
-            raise AuthErrorHandler.raise_unauthorized()
 
     def handling_paginated_request(self,
                                    current_user,
@@ -75,7 +61,12 @@ class NoteManager:
             log_description = (f"User get pagination notes with search: "
                                f"{search_query}") if search_query \
                 else "User get pagination notes"
-            self._log_action(current_user.user_id, "get_paginated_notes", log_description)
+
+            CommonService(self.db).log_action(
+                user_id=current_user.user_id,
+                action="Get notes",
+                description=log_description
+            )
 
             return NoteDTO.paginated_response(
                 notes,
@@ -205,9 +196,12 @@ class NoteManager:
                     )
                 )
 
-            self._log_action(current_user.user_id,
-                             "search_notes",
-                             "User searched notes successfully")
+            CommonService(self.db).log_action(
+                user_id=current_user.user_id,
+                action="Search Notes",
+                description="User searched notes successfully"
+            )
+
             notes = base_query.all()
             return [NoteDTO.from_model(note) for note in notes]
         except SQLAlchemyError as e:
@@ -235,7 +229,11 @@ class NoteManager:
                 user_id=current_user.user_id
             )
 
-            self._log_action(current_user.user_id, "create_note", "User create note successfully")
+            CommonService(self.db).log_action(
+                user_id=current_user.user_id,
+                action="Create Note",
+                description="User create note successfully"
+            )
             self.db.add(new_note)
             self.db.commit()
             self.db.refresh(new_note)
@@ -274,7 +272,12 @@ class NoteManager:
 
             note_obj.updated_at = datetime.now()
 
-            self._log_action(current_user.user_id, "update_note", "User update note successfully")
+            CommonService(self.db).log_action(
+                user_id=current_user.user_id,
+                action="Update Note",
+                description="User update note successfully"
+            )
+
             self.db.commit()
             self.db.refresh(note_obj)
             return NoteDTO.from_model(note_obj)
@@ -299,9 +302,11 @@ class NoteManager:
             if note_obj.user_id != current_user.user_id:
                 AuthErrorHandler.raise_unauthorized()
 
-            self._log_action(current_user.user_id,
-                             "delete_note",
-                             "User delete note successfully")
+            CommonService(self.db).log_action(
+                user_id=current_user.user_id,
+                action="Delete Note",
+                description="User delete note successfully"
+            )
             self.db.delete(note_obj)
             self.db.commit()
             return {"result": f"Note {note_id} has been deleted",

@@ -13,7 +13,7 @@ from app.db.models import Audit
 from app.db.models.user.model import User
 from app.dto.user.user_dto import UserDTO
 from app.email.email_service import EmailService, EmailSchema
-from app.repositories.audit.repository import log_audit_event
+from app.repositories.auth.common.services import CommonService
 from app.repositories.logger.repository import LoggerService
 
 logger = LoggerService().logger
@@ -41,14 +41,6 @@ class UserManager:
         except Exception as e:
             self.db.rollback()
             raise UserErrorHandler.raise_server_error(str(e))
-
-    def _log_action(self, user_id, action, description):
-        try:
-            logger.info("User %s %s %s", user_id, action, description)
-            log_audit_event(self.db, user_id=user_id, action=action, description=description)
-        except IndexError as e:
-            self.db.rollback()
-            UserErrorHandler.raise_server_error(str(e))
 
     def _reset_password_with_token(self, token: str, new_password: str):
         """
@@ -91,7 +83,11 @@ class UserManager:
             if not user:
                 UserErrorHandler.raise_user_not_found()
 
-            self._log_action(current_user.user_id, "Refresh token", "Refresh token")
+            CommonService(self.db).log_action(
+                user_id=user.user_id,
+                action="Refresh token",
+                description="Refresh token"
+            )
 
             return generate_user_token_and_return_user(user)
         except Exception as e:
@@ -121,7 +117,11 @@ class UserManager:
             self.db.refresh(new_user)
 
             user_fetched = self._get_user(username=new_user.username)
-            self._log_action(user_fetched.user_id, "Register", "Registered user")
+            CommonService(self.db).log_action(
+                user_id=user_fetched.user_id,
+                action="Register",
+                description="Registered user"
+            )
 
             return generate_user_token_and_return_user(user_fetched)
         except Exception as e:
@@ -142,7 +142,11 @@ class UserManager:
 
             user.set_password(new_password)
             user.updated_at = datetime.now()
-            self._log_action(user.user_id, "Reset Google Password", "Password reset successfully")
+            CommonService(self.db).log_action(
+                user_id=user.user_id,
+                action="Reset password",
+                description="Reset password"
+            )
             self.db.commit()
 
             return {"user": UserDTO.from_model(user),
@@ -159,7 +163,11 @@ class UserManager:
         """
         try:
             user = self._get_user(user_id=current_user.user_id)
-            self._log_action(current_user.user_id, "Get user info", "Get user info")
+            CommonService(self.db).log_action(
+                user_id=current_user.user_id,
+                action="Get user info",
+                description="Get user info"
+            )
             return UserDTO.from_model(user)
         except Exception as e:
             self.db.rollback()
@@ -176,7 +184,11 @@ class UserManager:
             if current_user.role != "ADMIN":
                 UserErrorHandler.raise_unauthorized_user_action()
 
-            self._log_action(current_user.user_id, "Get users", "Get users")
+            CommonService(self.db).log_action(
+                user_id=current_user.user_id,
+                action="Get users",
+                description="Get users"
+            )
             return [UserDTO.from_model(user) for user in users]
         except IndexError as e:
             self.db.rollback()
@@ -201,7 +213,12 @@ class UserManager:
                 user.email = user_data.email
 
             user.updated_at = datetime.now()
-            self._log_action(current_user.user_id, "Update", "Updated user information")
+
+            CommonService(self.db).log_action(
+                user_id=current_user.user_id,
+                action="Update user",
+                description="Update user"
+            )
             self.db.commit()
             self.db.refresh(user)
 
@@ -223,8 +240,11 @@ class UserManager:
             if user.user_id != current_user.user_id:
                 UserErrorHandler.raise_unauthorized_user_action()
 
-            self._log_action(current_user.user_id, "Delete",
-                             f"Deleted his user account where username is {user.username}")
+            CommonService(self.db).log_action(
+                user_id=current_user.user_id,
+                action="Delete user",
+                description=f"Deleted his user account where username is {user.username}"
+            )
 
             if user:
                 self.db.query(Audit).filter(Audit.user_id == user.user_id).delete()

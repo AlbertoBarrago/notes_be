@@ -11,7 +11,7 @@ from app.core.exceptions.auth import AuthErrorHandler
 from app.core.exceptions.generic import GlobalErrorHandler
 from app.db.models import User
 from app.email.email_service import EmailService, EmailSchema
-from app.repositories.audit.repository import log_audit_event
+from app.repositories.auth.common.services import CommonService
 from app.repositories.logger.repository import LoggerService
 
 logger = LoggerService().logger
@@ -36,16 +36,6 @@ class PasswordManager:
                         (User.email == username))
                 .first())
 
-    def _log_action(self, user_id, action, description):
-        """
-        Log action
-        :param user_id:
-        :param action:
-        :param description:
-        """
-        logger.info("User %s %s %s", user_id, action, description)
-        log_audit_event(self.db, user_id=user_id, action=action, description=description)
-
     def send_password_reset_email(self, token, username, background_tasks):
         """
         Send password reset email
@@ -58,10 +48,11 @@ class PasswordManager:
         if not user:
             AuthErrorHandler.raise_user_not_found()
 
-        log_audit_event(self.db,
-                        user_id=user.user_id,
-                        action="Password Reset",
-                        description="Password reset requested")
+        CommonService(self.db).log_action(
+            user_id=user.user_id,
+            action="Password Reset",
+            description="Password reset requested"
+        )
 
         try:
             email_service = EmailService()
@@ -73,6 +64,12 @@ class PasswordManager:
                 email_service.send_password_setup_email,
                 email_schema,
                 token
+            )
+
+            CommonService(self.db).log_action(
+                user_id=user.user_id,
+                action="Password Reset",
+                description="Password reset email sent"
             )
 
             result = {
@@ -130,9 +127,12 @@ class PasswordManager:
                 reset_token
             )
 
-            self._log_action(user.user_id,
-                             action="Password Reset",
-                             description="Password reset initiated")
+            CommonService(self.db).log_action(
+                user_id=user.user_id,
+                action="Password Reset",
+                description="Password reset initiated"
+            )
+
             return {"message": "Password reset instructions have been sent to your email"}
 
         except (ConnectionError, TimeoutError):
