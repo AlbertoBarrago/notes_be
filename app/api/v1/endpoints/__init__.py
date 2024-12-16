@@ -2,7 +2,7 @@
 This module contains the endpoints for the API.
 """
 
-from .authorization import router as auth_router
+from .auth import router as auth_router
 from .healthcheck import router as healthcheck_router
 from .home import router as home_router
 from .notes import router as notes_router
