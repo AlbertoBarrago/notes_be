@@ -24,7 +24,8 @@ router = APIRouter()
 
 @router.get("/list/public",
             response_model=PaginatedResponse[NoteOut],
-            responses={**CommonResponses.UNAUTHORIZED, **CommonResponses.INTERNAL_SERVER_ERROR})
+            responses={**CommonResponses.UNAUTHORIZED,
+                       **CommonResponses.INTERNAL_SERVER_ERROR})
 def get_public_notes(
         params: Annotated[NoteQueryParams, Depends()],
         current_user: User = Depends(get_current_user),
@@ -47,7 +48,8 @@ def get_public_notes(
 
 @router.get("/list/private",
             response_model=PaginatedResponse[NoteOut],
-            responses={**CommonResponses.UNAUTHORIZED, **CommonResponses.INTERNAL_SERVER_ERROR})
+            responses={**CommonResponses.UNAUTHORIZED,
+                       **CommonResponses.INTERNAL_SERVER_ERROR})
 def get_paginated_and_filtered_notes(
         params: Annotated[NoteQueryParams, Depends()],
         current_user: User = Depends(get_current_user),
@@ -114,7 +116,8 @@ def get_note(note_id: int,
 
 @router.post("/",
              response_model=NoteOut,
-             responses={**CommonResponses.UNAUTHORIZED, **CommonResponses.INTERNAL_SERVER_ERROR})
+             responses={**CommonResponses.UNAUTHORIZED,
+                        **CommonResponses.INTERNAL_SERVER_ERROR})
 def add_note(note: NoteCreate,
              db: Session = Depends(get_db),
              current_user: User = Depends(get_current_user)):
@@ -133,7 +136,8 @@ def add_note(note: NoteCreate,
 
 @router.put("/{note_id}",
             response_model=NoteOut,
-            responses={**CommonResponses.UNAUTHORIZED, **CommonResponses.INTERNAL_SERVER_ERROR})
+            responses={**CommonResponses.UNAUTHORIZED,
+                       **CommonResponses.INTERNAL_SERVER_ERROR})
 def update_note(note_id: int, note: NoteUpdate, db: Session = Depends(get_db),
                 current_user: User = Depends(get_current_user)):
     """
@@ -153,7 +157,8 @@ def update_note(note_id: int, note: NoteUpdate, db: Session = Depends(get_db),
 
 @router.delete("/{note_id}",
                response_model=NoteDelete,
-               responses={**CommonResponses.UNAUTHORIZED, **CommonResponses.INTERNAL_SERVER_ERROR})
+               responses={**CommonResponses.UNAUTHORIZED,
+                          **CommonResponses.INTERNAL_SERVER_ERROR})
 def delete_note(note_id: int,
                 db: Session = Depends(get_db),
                 current_user: User = Depends(get_current_user)):

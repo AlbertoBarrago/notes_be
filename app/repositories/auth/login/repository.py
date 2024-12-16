@@ -50,7 +50,7 @@ class LoginManager:
         if not user or not user.verify_password(password):
             AuthErrorHandler.raise_invalid_credentials()
 
-        CommonService.log_action(
+        CommonService(self.db).log_action(
             user_id=user.user_id,
             action="Login",
             description="Logged from swagger"
