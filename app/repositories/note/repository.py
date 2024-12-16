@@ -25,7 +25,6 @@ class NoteManager:
     def __init__(self, db):
         self.db = db
 
-
     def handling_paginated_request(self,
                                    current_user,
                                    page,
