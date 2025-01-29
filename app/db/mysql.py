@@ -57,7 +57,7 @@ def get_current_user(token: str = Depends(oauth2_scheme),
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         user_id: str = payload.get("sub")
-        user = db.query(User).filter(User.user_id == user_id).first()
+        user = db.query(User).filter(User.id == user_id).first()
 
         if user is None:
             raise HTTPException(status_code=401,

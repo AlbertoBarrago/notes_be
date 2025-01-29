@@ -34,7 +34,7 @@ class UserManager:
         """
         try:
             if user_id:
-                return self.db.query(User).filter(User.user_id == user_id).first()
+                return self.db.query(User).filter(User.id == user_id).first()
             return self.db.query(User).filter(
                 or_(User.username == username,
                     User.email == username)).first()
@@ -79,12 +79,12 @@ class UserManager:
         :return: User with new access token
         """
         try:
-            user = self._get_user(user_id=current_user.user_id)
+            user = self._get_user(user_id=current_user.id)
             if not user:
                 UserErrorHandler.raise_user_not_found()
 
             CommonService(self.db).log_action(
-                user_id=user.user_id,
+                user_id=user.id,
                 action="Refresh token",
                 description="Refresh token"
             )
@@ -118,7 +118,7 @@ class UserManager:
 
             user_fetched = self._get_user(username=new_user.username)
             CommonService(self.db).log_action(
-                user_id=user_fetched.user_id,
+                user_id=user_fetched.id,
                 action="Register",
                 description="Registered user"
             )
@@ -126,7 +126,7 @@ class UserManager:
             return generate_user_token_and_return_user(user_fetched)
         except Exception as e:
             self.db.rollback()
-            raise UserErrorHandler.raise_server_error(e.args[0])
+            raise UserErrorHandler.raise_server_error(e.args[1])
 
     def reset_password(self, user_username, new_password):
         """
@@ -143,7 +143,7 @@ class UserManager:
             user.set_password(new_password)
             user.updated_at = datetime.now()
             CommonService(self.db).log_action(
-                user_id=user.user_id,
+                user_id=user.id,
                 action="Reset password",
                 description="Reset password"
             )
@@ -162,9 +162,9 @@ class UserManager:
         :return: User
         """
         try:
-            user = self._get_user(user_id=current_user.user_id)
+            user = self._get_user(user_id=current_user.id)
             CommonService(self.db).log_action(
-                user_id=current_user.user_id,
+                user_id=current_user.id,
                 action="Get user info",
                 description="Get user info"
             )
@@ -185,7 +185,7 @@ class UserManager:
                 UserErrorHandler.raise_unauthorized_user_action()
 
             CommonService(self.db).log_action(
-                user_id=current_user.user_id,
+                user_id=current_user.id,
                 action="Get users",
                 description="Get users"
             )
@@ -202,9 +202,9 @@ class UserManager:
         :return: User
         """
         try:
-            user = self._get_user(user_id=current_user.user_id)
+            user = self._get_user(user_id=current_user.id)
 
-            if user.user_id != current_user.user_id:
+            if user.id != current_user.id:
                 UserErrorHandler.raise_unauthorized_user_action()
 
             if user_data.username:
@@ -215,7 +215,7 @@ class UserManager:
             user.updated_at = datetime.now()
 
             CommonService(self.db).log_action(
-                user_id=current_user.user_id,
+                user_id=current_user.id,
                 action="Update user",
                 description="Update user"
             )
@@ -235,19 +235,19 @@ class UserManager:
         :return: User
         """
         try:
-            user = self._get_user(user_id=current_user.user_id)
+            user = self._get_user(user_id=current_user.id)
 
-            if user.user_id != current_user.user_id:
+            if user.id != current_user.id:
                 UserErrorHandler.raise_unauthorized_user_action()
 
             CommonService(self.db).log_action(
-                user_id=current_user.user_id,
+                user_id=current_user.id,
                 action="Delete user",
                 description=f"Deleted his user account where username is {user.username}"
             )
 
             if user:
-                self.db.query(Audit).filter(Audit.user_id == user.user_id).delete()
+                self.db.query(Audit).filter(Audit.user_id == user.id).delete()
                 self.db.delete(user)
                 self.db.commit()
                 return {"message": "User deleted successfully"}

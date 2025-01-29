@@ -53,7 +53,7 @@ class CacheRepository:
             Any: A list of notes retrieved based on the specified parameters.
         """
         CommonService(self.db).log_action(
-            user_id=current_user.user_id,
+            user_id=current_user.id,
             action='Fetch from cache',
             description='Get Public Notes from Cache'
         )
@@ -91,7 +91,7 @@ class CacheRepository:
                 The paginated list of notes along with relevant metadata.
         """
         CommonService(self.db).log_action(
-            user_id=current_user.user_id,
+            user_id=current_user.id,
             action='Fetch from cache',
             description='Get Notes from Cache'
         )

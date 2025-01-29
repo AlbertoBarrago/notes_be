@@ -20,7 +20,7 @@ class UserDTO:
     UserDTO can be populated from a user model using its static method.
 
     Attributes:
-        user_id: Unique identifier for the user.
+        id: Unique identifier for the user.
         username: Name chosen by the user to represent themselves.
         email: Email address associated with the user account.
         role: Role assigned to the user, indicating their level of access.
@@ -44,7 +44,7 @@ class UserDTO:
         This includes converting
         datetime objects to ISO formatted strings.
     """
-    user_id: int
+    id: int
     username: str
     email: str
     role: str
@@ -70,7 +70,7 @@ class UserDTO:
             returned as None if not available.
         """
         return {
-            "user_id": user.user_id,
+            "id": user.id,
             "username": user.username,
             "email": user.email,
             "role": user.role,

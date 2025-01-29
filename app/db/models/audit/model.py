@@ -16,7 +16,7 @@ class Audit(Base):
     __tablename__ = "audit"
 
     id = Column(Integer, primary_key=True)
-    user_id = Column(String(36), ForeignKey('users.user_id'), nullable=False)
+    user_id = Column(String(36), ForeignKey('users.id'), nullable=False)
     action = Column(String(255), nullable=False)
     description = Column(String(255), nullable=True)
     timestamp = Column(DateTime, default=datetime.now, nullable=False)

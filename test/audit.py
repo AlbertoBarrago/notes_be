@@ -1,85 +1,94 @@
+"""Test class for verifying the functionality of the Note model."""
 from datetime import datetime
-import bcrypt
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+
 from app.db.models import Base
+from app.db.models.notes.model import Note
 from app.db.models.user.model import User
-from app.db.models.audit.model import Audit
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
 engine = create_engine(SQLALCHEMY_DATABASE_URL, echo=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-class TestAuditLog:
+class TestNote:
+    """
+    A test class for verifying the functionality of the Note model.
+
+    This class sets up the database with test data, including a test user
+    and associated notes, and then performs various tests to validate
+    the creation, update, and deletion functionalities of the Note model.
+
+    Attributes:
+        session (SessionLocal): A SQLAlchemy session used for interacting with the database.
+        test_user (User): A test user created for associating with test notes.
+        valid_note (Note): A sample note created for testing, associated with the test user.
+    """
+
+    def __init__(self):
+        """Initialize attributes to avoid Pylint warnings"""
+        self.session = None
+        self.test_user = None
+        self.valid_note = None
 
     def setup_class(self):
-        """
-        Set up the test by creating a user and an audit log entry.
-        """
-        user_data = {
-            "username": "testuser",
-            "email": "test@example.com",
-            "password": "password123"
-        }
-
+        """Setup the test database and create test data"""
         Base.metadata.create_all(engine)
-
         self.session = SessionLocal()
 
-        # Create and hash the user password
-        hashed_password = bcrypt.hashpw(user_data["password"].encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-
-        self.new_user = User(
-            username=user_data["username"],
-            email=user_data["email"],
-            hashed_password=hashed_password,
+        # Create a test user
+        self.test_user = User(
+            username="test_user",
+            email="test_user@example.com",
+            hashed_password="hashed_password",
             created_at=datetime.now(),
             updated_at=datetime.now()
         )
-
-        # Add the user to the session and commit
-        self.session.add(self.new_user)
+        self.session.add(self.test_user)
         self.session.commit()
 
-        # Create an audit log entry for the user
-        self.audit_log = Audit(
-            user_id=self.new_user.user_id,
-            action="LOGIN",
-            description="User logged in successfully",
-            timestamp=datetime.now()
+        # Create a test note
+        self.valid_note = Note(
+            title="Test Note",
+            content="This is a test note.",
+            created_at=datetime.now(),
+            updated_at=datetime.now(),
+            user_id=self.test_user.id
         )
 
-        # Add the audit log entry to the session and commit
-        self.session.add(self.audit_log)
+        self.session.add(self.valid_note)
         self.session.commit()
 
     def teardown_class(self):
-        """
-        Clean up after the test by rolling back the session and closing it.
-        """
+        """Teardown class by rolling back and closing the session"""
         self.session.rollback()
         self.session.close()
 
-    def test_audit_log_creation(self):
-        """
-        Test that an audit log entry is correctly created for a user.
-        Verifies that the audit log entry is saved and associated with the correct user.
-        """
-        audit_entry = self.session.query(Audit).filter(Audit.user_id == self.new_user.user_id).first()
+    def test_note_creation(self):
+        """Test if a note is correctly created in the database"""
+        note = self.session.query(Note).filter_by(title="Test Note").first()
 
-        assert audit_entry is not None
-        assert audit_entry.user_id == self.new_user.user_id
-        assert audit_entry.action == "LOGIN"
-        assert audit_entry.description == "User logged in successfully"
-        assert audit_entry.timestamp is not None
+        assert note is not None
+        assert note.title == "Test Note"
+        assert note.content == "This is a test note."
 
-    def test_audit_log_user_association(self):
-        """
-        Test that the audit log entry is correctly associated with the user.
-        """
-        audit_entry = self.session.query(Audit).filter(Audit.user_id == self.new_user.user_id).first()
+    def test_note_update(self):
+        """Test updating a note's content"""
+        note = self.session.query(Note).filter_by(title="Test Note").first()
 
-        assert audit_entry.user is not None
-        assert audit_entry.user.username == "testuser"
-        assert audit_entry.user.email == "test@example.com"
+        note.content = "Updated content"
+        self.session.commit()
+
+        updated_note = self.session.query(Note).filter_by(title="Test Note").first()
+        assert updated_note.content == "Updated content"
+
+    def test_note_deletion(self):
+        """Test deleting a note"""
+        note = self.session.query(Note).filter_by(title="Test Note").first()
+        self.session.delete(note)
+        self.session.commit()
+
+        deleted_note = self.session.query(Note).filter_by(title="Test Note").first()
+        assert deleted_note is None

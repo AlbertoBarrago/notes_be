@@ -17,26 +17,27 @@ router = APIRouter()
 
 
 @router.get("/", response_model=UserOut, responses=CommonResponses.UNAUTHORIZED)
-def get_user(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+async def get_user(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     """
     Get current user
     :param current_user:
     :param db:
     :return: User
     """
-    return UserManager(db).perform_action_user('get_user', current_user)
+    return await UserManager(db).perform_action_user(action='get_user', current_user=current_user)
 
 
 @router.get("/list", response_model=List[UserOut], responses=CommonResponses.UNAUTHORIZED)
-def get_users_list(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+async def get_users_list(current_user: User = Depends(get_current_user),
+                         db: Session = Depends(get_db)):
     """
     Get current user
     :param current_user:
     :param db:
     :return: User
     """
-    return UserManager(db).perform_action_user(
-        "get_users_list",
+    return await UserManager(db).perform_action_user(
+        "get_users",
         current_user=current_user
     )
 
@@ -51,7 +52,7 @@ async def register_user(user: UserRequestAdd, db: Session = Depends(get_db)):
     :param db:
     :return: UserOut
     """
-    return await UserManager(db).perform_action_user("register_user",
+    return await UserManager(db).perform_action_user(action="register_user",
                                                      user=user)
 
 

@@ -62,7 +62,7 @@ class NoteManager:
                 else "User get pagination notes"
 
             CommonService(self.db).log_action(
-                user_id=current_user.user_id,
+                user_id=current_user.id,
                 action="Get notes",
                 description=log_description
             )
@@ -101,7 +101,7 @@ class NoteManager:
         try:
             skip = (page - 1) * page_size
             query = (self.db.query(Note).join(User,
-                                              Note.user_id == User.user_id,
+                                              Note.user_id == User.id,
                                               isouter=True)
                      .filter(Note.is_public.is_(True)))
 
@@ -138,7 +138,7 @@ class NoteManager:
             query = (self.db.query(Note)
                      .join(User)
                      .options(joinedload(Note.user))
-                     .filter(Note.user_id == current_user.user_id))
+                     .filter(Note.user_id == current_user.id))
 
             return self.handling_paginated_request(current_user,
                                                    page,
@@ -166,7 +166,7 @@ class NoteManager:
                         .filter(Note.id == note_id).first())
             if not note_obj:
                 NoteErrorHandler.raise_note_not_found()
-            if not note_obj.is_public and note_obj.user_id != current_user.user_id:
+            if not note_obj.is_public and note_obj.id != current_user.id:
                 AuthErrorHandler.raise_unauthorized()
             return NoteDTO.from_model(note_obj)
         except SQLAlchemyError as e:
@@ -183,7 +183,7 @@ class NoteManager:
     def search_notes(self, current_user, query):
         """Search notes by query"""
         try:
-            base_query = self.db.query(Note).join(User).filter(Note.user_id == current_user.user_id)
+            base_query = self.db.query(Note).join(User).filter(Note.user_id == current_user.id)
 
             if query:
                 search = f"%{query}%"
@@ -196,7 +196,7 @@ class NoteManager:
                 )
 
             CommonService(self.db).log_action(
-                user_id=current_user.user_id,
+                user_id=current_user.id,
                 action="Search Notes",
                 description="User searched notes successfully"
             )
@@ -225,11 +225,11 @@ class NoteManager:
                 image_url=note.image_url,
                 created_at=datetime.now(),
                 updated_at=datetime.now(),
-                user_id=current_user.user_id
+                user_id=current_user.id
             )
 
             CommonService(self.db).log_action(
-                user_id=current_user.user_id,
+                user_id=current_user.id,
                 action="Create Note",
                 description="User create note successfully"
             )
@@ -254,7 +254,7 @@ class NoteManager:
                         .filter(Note.id == note_id).first())
             if not note_obj:
                 NoteErrorHandler.raise_note_not_found()
-            if note_obj.user_id != current_user.user_id:
+            if note_obj.id != current_user.id:
                 AuthErrorHandler.raise_unauthorized()
 
             update_fields = {
@@ -272,7 +272,7 @@ class NoteManager:
             note_obj.updated_at = datetime.now()
 
             CommonService(self.db).log_action(
-                user_id=current_user.user_id,
+                user_id=current_user.id,
                 action="Update Note",
                 description="User update note successfully"
             )
@@ -298,11 +298,11 @@ class NoteManager:
                         .filter(Note.id == note_id).first())
             if not note_obj:
                 NoteErrorHandler.raise_note_not_found()
-            if note_obj.user_id != current_user.user_id:
+            if note_obj.id != current_user.id:
                 AuthErrorHandler.raise_unauthorized()
 
             CommonService(self.db).log_action(
-                user_id=current_user.user_id,
+                user_id=current_user.id,
                 action="Delete Note",
                 description="User delete note successfully"
             )
