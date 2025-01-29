@@ -323,4 +323,7 @@ test.db
 ### DS STORE
 .DS_Store
 
+###
+alembic
+
 # End of https://www.toptal.com/developers/gitignore/api/python,git,jetbrains,venv
