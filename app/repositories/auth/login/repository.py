@@ -31,7 +31,7 @@ class LoginManager:
             AuthErrorHandler.raise_invalid_credentials()
 
         CommonService(self.db).log_action(
-            user_id=user.user_id,
+            user_id=user.id,
             action="Login",
             description="User logged in successfully"
         )
@@ -51,7 +51,7 @@ class LoginManager:
             AuthErrorHandler.raise_invalid_credentials()
 
         CommonService(self.db).log_action(
-            user_id=user.user_id,
+            user_id=user.id,
             action="Login",
             description="Logged from swagger"
         )

@@ -4,9 +4,8 @@ Users Model
 import uuid
 from datetime import datetime
 
-from passlib.context import CryptContext
 import bcrypt
-
+from passlib.context import CryptContext
 from sqlalchemy import Column, String, DateTime
 from sqlalchemy.orm import relationship
 
@@ -21,7 +20,7 @@ class User(Base):
     """
     __tablename__ = "users"
 
-    user_id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     username = Column(String(50), unique=True, index=True, nullable=False)
     email = Column(String(100), unique=True, index=True, nullable=False)
     picture_url = Column(String(255), nullable=True)

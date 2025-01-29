@@ -14,7 +14,7 @@ class Note(Base):
     __tablename__ = 'notes'
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    user_id = Column(String(36), ForeignKey('users.user_id'), nullable=False)
+    user_id = Column(String(36), ForeignKey('users.id'), nullable=False)
     title = Column(String(100), nullable=False)
     content = Column(Text, nullable=False)
     created_at = Column(DateTime, nullable=False)

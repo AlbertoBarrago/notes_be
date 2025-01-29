@@ -49,7 +49,7 @@ class PasswordManager:
             AuthErrorHandler.raise_user_not_found()
 
         CommonService(self.db).log_action(
-            user_id=user.user_id,
+            user_id=user.id,
             action="Password Reset",
             description="Password reset requested"
         )
@@ -67,7 +67,7 @@ class PasswordManager:
             )
 
             CommonService(self.db).log_action(
-                user_id=user.user_id,
+                user_id=user.id,
                 action="Password Reset",
                 description="Password reset email sent"
             )
@@ -110,7 +110,7 @@ class PasswordManager:
             return {"message": "If the email exists, a password reset link has been sent"}
 
         reset_token = create_access_token(
-            data={"sub": user.user_id, "purpose": "password_reset"},
+            data={"sub": user.id, "purpose": "password_reset"},
             expires_delta=timedelta(minutes=15)
         )
 
@@ -128,7 +128,7 @@ class PasswordManager:
             )
 
             CommonService(self.db).log_action(
-                user_id=user.user_id,
+                user_id=user.id,
                 action="Password Reset",
                 description="Password reset initiated"
             )

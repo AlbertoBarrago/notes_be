@@ -85,7 +85,7 @@ def get_user_info(db, request):
     request = TokenRequest(username=user_from_google['name'])
 
     CommonService(db).log_action(
-        user_id=user.user_id,
+        user_id=user.id,
         action="Login",
         description="Login from Google"
     )
@@ -125,7 +125,7 @@ async def add_user_to_db(db, request, background_tasks):
 
             user_fetched = db.query(User).filter(User.email == user_from_google['email']).first()
             CommonService.log_action(
-                user_id=user_fetched.user_id,
+                user_id=user_fetched.id,
                 action="Google Registered",
                 description="Registered user By Google"
             )

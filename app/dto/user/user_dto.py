@@ -70,7 +70,7 @@ class UserDTO:
             returned as None if not available.
         """
         return {
-            "user_id": user.user_id,
+            "user_id": user.id,
             "username": user.username,
             "email": user.email,
             "role": user.role,
