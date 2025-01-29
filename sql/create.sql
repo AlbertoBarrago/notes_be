@@ -57,6 +57,3 @@ CREATE TABLE rate_limits
     requests   INT       DEFAULT 0,
     timestamp  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
-DROP TABLE alembic_version;
-DROP TABLE audit;
