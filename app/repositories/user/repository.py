@@ -126,7 +126,7 @@ class UserManager:
             return generate_user_token_and_return_user(user_fetched)
         except Exception as e:
             self.db.rollback()
-            raise UserErrorHandler.raise_server_error(e.args[0])
+            raise UserErrorHandler.raise_server_error(e.args[1])
 
     def reset_password(self, user_username, new_password):
         """

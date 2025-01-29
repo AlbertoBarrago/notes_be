@@ -15,17 +15,17 @@ class UserBase(BaseModel):
     email: str
 
 
-class UserOut(UserBase):
+class UserOut(BaseModel):
     """
     User Out Model
     """
-    user_id: str
+    id: str
     username: str
     email: str
     picture_url: Optional[str] = None
 
 
-class UserRequestAdd(UserBase):
+class UserRequestAdd(BaseModel):
     """
     User Update Model
     """

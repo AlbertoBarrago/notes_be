@@ -1,18 +1,6 @@
 CREATE DATABASE notez_be;
 USE notez_be;
 
--- Audit Table
-CREATE TABLE audit
-(
-    id          SERIAL PRIMARY KEY,
-    user_id     VARCHAR(36) NOT NULL,
-    action      VARCHAR(50) NOT NULL,
-    description TEXT,
-    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT fk_user_audit FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE
-);
-
 -- Users Table
 CREATE TABLE users
 (
@@ -24,6 +12,18 @@ CREATE TABLE users
     created_at      TIMESTAMP                    DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMP                    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     role            VARCHAR(50)         NOT NULL DEFAULT 'GUEST'
+);
+
+-- Audit Table
+CREATE TABLE audit
+(
+    id          SERIAL PRIMARY KEY,
+    user_id     VARCHAR(36) NOT NULL,
+    action      VARCHAR(50) NOT NULL,
+    description TEXT,
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT fk_user_audit FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 -- Notes Table
@@ -57,3 +57,6 @@ CREATE TABLE rate_limits
     requests   INT       DEFAULT 0,
     timestamp  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+DROP TABLE alembic_version;
+DROP TABLE audit;
