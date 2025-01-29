@@ -37,7 +37,7 @@ async def get_users_list(current_user: User = Depends(get_current_user),
     :return: User
     """
     return await UserManager(db).perform_action_user(
-        "get_users_list",
+        "get_users",
         current_user=current_user
     )
 
