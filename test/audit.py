@@ -1,4 +1,4 @@
-"""Test class for verifying the functionality of the Note model."""
+"""Test the Audit model."""
 from datetime import datetime
 
 from sqlalchemy import create_engine
@@ -15,16 +15,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 class TestNote:
     """
-    A test class for verifying the functionality of the Note model.
-
-    This class sets up the database with test data, including a test user
-    and associated notes, and then performs various tests to validate
-    the creation, update, and deletion functionalities of the Note model.
-
-    Attributes:
-        session (SessionLocal): A SQLAlchemy session used for interacting with the database.
-        test_user (User): A test user created for associating with test notes.
-        valid_note (Note): A sample note created for testing, associated with the test user.
+    A test class for verifying the functionality of the Audit model.
     """
 
     def __init__(self):
@@ -34,7 +25,7 @@ class TestNote:
         self.valid_note = None
 
     def setup_class(self):
-        """Setup the test database and create test data"""
+        """Set up the test database and create test data"""
         Base.metadata.create_all(engine)
         self.session = SessionLocal()
 

@@ -1,8 +1,12 @@
-"""Auth Test"""
+"""
+This module contains the test class for the User model.
+"""
 from datetime import datetime
+
 import bcrypt
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+
 from app.db.models import Base
 from app.db.models.user.model import User
 
@@ -12,12 +16,16 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
 class TestUser:
-
     def setup_class(self):
         """
         Set up the test by creating the user in an in-memory SQLite database.
         Hashes the password before saving the user.
         """
+
+    def __init__(self):
+        self.session = None
+        self.new_user = None
+
         user_data = {
             "username": "testuser",
             "email": "test@example.com",
@@ -53,7 +61,8 @@ class TestUser:
         Test that the user was correctly registered and the password is hashed.
         Verifies that the user exists in the database and that the password matches.
         """
-        created_user = self.session.query(User).filter(User.username == "testuser").first()
+        created_user = (self.session.query(User)
+                        .filter(User.username == "testuser").first())
 
         assert created_user is not None
         assert created_user.username == "testuser"
