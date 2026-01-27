@@ -13,7 +13,47 @@ Rate limiting and audit actions.
 - Audit actions
 - Work in progress
 
-## Test 
+## Vademecum
+
+### 1. Setup environment (uv)
+```shell
+uv venv --python 3.12 .venv
+source .venv/bin/activate
+uv pip install -r requirements.txt
+```
+
+### 2. Configure environment
+```shell
+cp .env.sample .env
+# Edit .env with your values (MYSQL_USER, MYSQL_PASSWORD, MYSQL_HOST, MYSQL_DATABASE, SECRET_KEY)
+```
+
+### 3. Setup database
+```shell
+# Make sure MySQL is running, then:
+mysql -u root -p < sql/create.sql
+
+# Or with Alembic:
+alembic upgrade head
+```
+
+### 4. Run the project
+```shell
+uvicorn app.main:app --host 0.0.0.0 --port 8080 --reload
+```
+App available at `http://localhost:8080` — Swagger at `http://localhost:8080/docs`
+
+### 5. Run tests
+```shell
+pytest -p no:warnings test/**/*.py
+```
+
+### 6. Lint
+```shell
+pylint app/
+```
+
+## Test
 ```shell
 pytest -p no:warnings test/**/*.py
 ```
@@ -46,11 +86,4 @@ pytest -p no:warnings test/**/*.py
  - Import Base and all Models inside `env.py`
  - `alembic revision --autogenerate -m "Create tables from scratch"`
  - `alembic upgrade head`
-
-## N.B.
-
-- Please, if you don't find some requirements, or have some problem during installing steps; Send me a PM.
-  I really appreciate ♥️
-
-- This project is evaluated by Cody 23k. 👍
 

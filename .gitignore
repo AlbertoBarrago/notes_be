@@ -325,5 +325,6 @@ test.db
 
 ###
 alembic
+CLAUDE.md
 
 # End of https://www.toptal.com/developers/gitignore/api/python,git,jetbrains,venv

@@ -166,7 +166,7 @@ class NoteManager:
                         .filter(Note.id == note_id).first())
             if not note_obj:
                 NoteErrorHandler.raise_note_not_found()
-            if not note_obj.is_public and note_obj.id != current_user.id:
+            if not note_obj.is_public and note_obj.user_id != current_user.id:
                 AuthErrorHandler.raise_unauthorized()
             return NoteDTO.from_model(note_obj)
         except SQLAlchemyError as e:
@@ -254,7 +254,7 @@ class NoteManager:
                         .filter(Note.id == note_id).first())
             if not note_obj:
                 NoteErrorHandler.raise_note_not_found()
-            if note_obj.id != current_user.id:
+            if note_obj.user_id != current_user.id:
                 AuthErrorHandler.raise_unauthorized()
 
             update_fields = {
@@ -298,7 +298,7 @@ class NoteManager:
                         .filter(Note.id == note_id).first())
             if not note_obj:
                 NoteErrorHandler.raise_note_not_found()
-            if note_obj.id != current_user.id:
+            if note_obj.user_id != current_user.id:
                 AuthErrorHandler.raise_unauthorized()
 
             CommonService(self.db).log_action(
