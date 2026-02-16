@@ -2,9 +2,11 @@
  Password manager
 """
 from datetime import timedelta
+from typing import Optional
 
 from fastapi import BackgroundTasks
 from pydantic.v1 import EmailStr
+from sqlalchemy.orm import Session
 
 from app.core import create_access_token
 from app.core.exceptions.auth import AuthErrorHandler
@@ -22,10 +24,10 @@ class PasswordManager:
     Session manager
     """
 
-    def __init__(self, db):
+    def __init__(self, db: Session):
         self.db = db
 
-    def _get_user(self, username):
+    def _get_user(self, username: str) -> Optional[User]:
         """
         Get user from database
         :param username:
@@ -36,7 +38,7 @@ class PasswordManager:
                         (User.email == username))
                 .first())
 
-    def send_password_reset_email(self, token, username, background_tasks):
+    def send_password_reset_email(self, token: str, username: str, background_tasks: BackgroundTasks) -> Optional[dict]:
         """
         Send password reset email
         :param token:
@@ -85,7 +87,7 @@ class PasswordManager:
             GlobalErrorHandler.raise_mail_reset_not_sent()
             return None
 
-    def initiate_password_reset(self, email: str, background_tasks: BackgroundTasks):
+    def initiate_password_reset(self, email: str, background_tasks: BackgroundTasks) -> Optional[dict]:
         """
         Initiates a password reset process by generating a reset token and
         sending an email to the user if they exist.

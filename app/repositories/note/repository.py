@@ -2,9 +2,10 @@
 Note Action DB
 """
 from datetime import datetime
+from typing import Optional
 
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy.sql.elements import or_
 
 from app.core.exceptions.auth import AuthErrorHandler
@@ -13,6 +14,7 @@ from app.db.models import Note, User
 from app.dto.note.note_dto import NoteDTO
 from app.repositories.auth.common.services import CommonService
 from app.repositories.logger.repository import LoggerService
+from app.schemas.notes.request import NoteCreate, NoteUpdate
 
 logger = LoggerService().logger
 
@@ -22,18 +24,18 @@ class NoteManager:
     Note manager class
     """
 
-    def __init__(self, db):
+    def __init__(self, db: Session):
         self.db = db
 
     def handling_paginated_request(self,
-                                   current_user,
-                                   page,
-                                   page_size,
+                                   current_user: User,
+                                   page: int,
+                                   page_size: int,
                                    query,
-                                   search_query,
-                                   skip,
-                                   sort_by,
-                                   sort_order):
+                                   search_query: str,
+                                   skip: int,
+                                   sort_by: str,
+                                   sort_order: str) -> Optional[dict]:
         """
         Handling pagination request
         """
@@ -88,13 +90,13 @@ class NoteManager:
         return None
 
     def get_explore_notes(self,
-                          current_user,
-                          page=1,
-                          page_size=10,
-                          search_query="",
-                          sort_by="created_at",
-                          sort_order="desc"
-                          ):
+                          current_user: User,
+                          page: int = 1,
+                          page_size: int = 10,
+                          search_query: str = "",
+                          sort_by: str = "created_at",
+                          sort_order: str = "desc"
+                          ) -> Optional[dict]:
         """
          Get public notes for logged user
         """
@@ -123,13 +125,13 @@ class NoteManager:
             NoteErrorHandler.raise_pagination_error(e)
         return None
 
-    def get_note_paginated(self, current_user,
-                           page=1,
-                           page_size=10,
-                           search_query="",
-                           sort_by="created_at",
-                           sort_order="desc"
-                           ):
+    def get_note_paginated(self, current_user: User,
+                           page: int = 1,
+                           page_size: int = 10,
+                           search_query: str = "",
+                           sort_by: str = "created_at",
+                           sort_order: str = "desc"
+                           ) -> Optional[dict]:
         """
          Get pagination notes for specific user
         """
@@ -159,7 +161,7 @@ class NoteManager:
             NoteErrorHandler.raise_pagination_error(e)
         return None
 
-    def get_note(self, note_id, current_user):
+    def get_note(self, note_id: int, current_user: User) -> Optional[dict]:
         """Get note by ID"""
         try:
             note_obj = (self.db.query(Note)
@@ -180,7 +182,7 @@ class NoteManager:
             NoteErrorHandler.raise_pagination_error(e)
         return None
 
-    def search_notes(self, current_user, query):
+    def search_notes(self, current_user: User, query: str) -> Optional[list[dict]]:
         """Search notes by query"""
         try:
             base_query = self.db.query(Note).join(User).filter(Note.user_id == current_user.id)
@@ -214,7 +216,7 @@ class NoteManager:
             NoteErrorHandler.raise_note_not_found()
         return None
 
-    def add_note(self, note, current_user):
+    def add_note(self, note: NoteCreate, current_user: User) -> Optional[dict]:
         """Add new note"""
         try:
             new_note = Note(
@@ -247,7 +249,7 @@ class NoteManager:
             NoteErrorHandler.raise_note_creation_error(str(e))
         return None
 
-    def update_note(self, note_id, note, current_user):
+    def update_note(self, note_id: int, note: NoteUpdate, current_user: User) -> Optional[dict]:
         """Update existing note"""
         try:
             note_obj = (self.db.query(Note)
@@ -291,7 +293,7 @@ class NoteManager:
             NoteErrorHandler.raise_note_update_error(e)
         return None
 
-    def delete_note(self, note_id, current_user):
+    def delete_note(self, note_id: int, current_user: User) -> Optional[dict]:
         """Delete note"""
         try:
             note_obj = (self.db.query(Note)

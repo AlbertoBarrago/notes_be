@@ -8,6 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from app.api.v1.endpoints import (
     healthcheck_router,
     auth_router,
+    backoffice_router,
     notes_router,
     users_router,
     home_router,
@@ -29,3 +30,5 @@ app.include_router(
     users_router, prefix="/api/v1/users", tags=["Users"])
 app.include_router(
     notes_router, prefix="/api/v1/notes", tags=["Notes"])
+app.include_router(
+    backoffice_router, prefix="/api/v1/backoffice", tags=["BackOffice"])

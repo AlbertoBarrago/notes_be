@@ -1,6 +1,6 @@
 # Notes BE
 
-A simple notes app with authentication and authorization. 
+A simple notes app with authentication and authorization.
 Rate limiting and audit actions.
 
 ⭐️ Swagger on `/docs`
@@ -11,15 +11,13 @@ Rate limiting and audit actions.
 - Mysql, SQLAlchemy and Alembic
 - Rate Limiting
 - Audit actions
-- Work in progress
+- BackOffice API (admin only)
 
 ## Vademecum
 
 ### 1. Setup environment (uv)
 ```shell
-uv venv --python 3.12 .venv
-source .venv/bin/activate
-uv pip install -r requirements.txt
+uv sync
 ```
 
 ### 2. Configure environment
@@ -34,31 +32,31 @@ cp .env.sample .env
 mysql -u root -p < sql/create.sql
 
 # Or with Alembic:
-alembic upgrade head
+uv run alembic upgrade head
 ```
 
 ### 4. Run the project
 ```shell
-uvicorn app.main:app --host 0.0.0.0 --port 8080 --reload
+uv run uvicorn app.main:app --host 0.0.0.0 --port 8080 --reload
 ```
 App available at `http://localhost:8080` — Swagger at `http://localhost:8080/docs`
 
 ### 5. Run tests
 ```shell
-pytest -p no:warnings test/**/*.py
+uv run pytest -p no:warnings test/**/*.py
 ```
 
 ### 6. Lint
 ```shell
-pylint app/
+uv run pylint app/
 ```
 
 ## Test
 ```shell
-pytest -p no:warnings test/**/*.py
+uv run pytest -p no:warnings test/**/*.py
 ```
 
-## Docker 
+## Docker
 - if you use `docker-compose up -d` you can access the app on `localhost:8080` and swagger on `localhost:8080/docs`
 - keep in mind that you need to create a `.env` file with the following variables:
 - `MYSQL_USER`
@@ -75,15 +73,14 @@ pytest -p no:warnings test/**/*.py
 ## TODOs
  - [x] Add Logger
  - [x] Improve Error Handling
- - [x] Audit action notes and auth 
+ - [x] Audit action notes and auth
  - [x] Check import
- - [x] Add home API for Welcome localhost:/ 
- - [ ] Add BackOffice API (get_users, get_notes, get_audit)
+ - [x] Add home API for Welcome localhost:/
+ - [x] Add BackOffice API (get_users, get_notes, get_audit)
 
 
-## Notes for alembic 
+## Notes for alembic
  - `alembic init alembic`
  - Import Base and all Models inside `env.py`
- - `alembic revision --autogenerate -m "Create tables from scratch"`
- - `alembic upgrade head`
-
+ - `uv run alembic revision --autogenerate -m "Create tables from scratch"`
+ - `uv run alembic upgrade head`

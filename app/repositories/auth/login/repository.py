@@ -1,6 +1,10 @@
 """
 Session actions
 """
+from typing import Optional
+
+from sqlalchemy.orm import Session
+
 from app.core.exceptions.auth import AuthErrorHandler
 from app.core.security import generate_user_token_and_return_user
 from app.repositories.auth.common.services import CommonService
@@ -12,10 +16,10 @@ class LoginManager:
     """
     Session manager
     """
-    def __init__(self, db):
+    def __init__(self, db: Session):
         self.db = db
 
-    def login(self, request, oauth=False):
+    def login(self, request, oauth: bool = False) -> dict:
         """
         Login user
         :param request:
@@ -38,7 +42,7 @@ class LoginManager:
 
         return generate_user_token_and_return_user(user)
 
-    def swagger_login(self, username, password):
+    def swagger_login(self, username: str, password: str) -> dict:
         """
         Login user from swagger
         :param username:
@@ -58,7 +62,7 @@ class LoginManager:
 
         return generate_user_token_and_return_user(user)
 
-    def perform_action_auth(self, action: str, request=None, **kwargs):
+    def perform_action_auth(self, action: str, request=None, **kwargs) -> Optional[dict]:
         """
         Perform action authorization
         :param action:

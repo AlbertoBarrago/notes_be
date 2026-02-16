@@ -2,10 +2,12 @@
 User actions
 """
 from datetime import datetime
+from typing import Optional
 
 from fastapi import HTTPException
 from pydantic.v1 import EmailStr
 from sqlalchemy import or_
+from sqlalchemy.orm import Session
 
 from app.core.exceptions.user import UserErrorHandler
 from app.core.security import generate_user_token_and_return_user, decode_access_token
@@ -24,11 +26,11 @@ class UserManager:
     User manager class
     """
 
-    def __init__(self, db):
+    def __init__(self, db: Session):
         self.db = db
         self.email_service = EmailService()
 
-    def _get_user(self, user_id=None, username=None):
+    def _get_user(self, user_id: Optional[str] = None, username: Optional[str] = None) -> Optional[User]:
         """
         Get user from a database
         """
@@ -42,7 +44,7 @@ class UserManager:
             self.db.rollback()
             raise UserErrorHandler.raise_server_error(str(e))
 
-    def _reset_password_with_token(self, token: str, new_password: str):
+    def _reset_password_with_token(self, token: str, new_password: str) -> Optional[dict]:
         """
         Reset password using Google token
         :param token: JWT token
@@ -72,7 +74,7 @@ class UserManager:
             UserErrorHandler.raise_server_error(e.args[0])
             return None
 
-    def _generate_user_token_and_return_user(self, current_user):
+    def _generate_user_token_and_return_user(self, current_user: User) -> dict:
         """
         Generate user token and return user with refreshed token
         :param current_user: Current user object
@@ -94,7 +96,7 @@ class UserManager:
             self.db.rollback()
             raise UserErrorHandler.raise_server_error(e.args[0])
 
-    async def register_user(self, user):
+    async def register_user(self, user) -> dict:
         """
         Register new user
         """
@@ -128,7 +130,7 @@ class UserManager:
             self.db.rollback()
             raise UserErrorHandler.raise_server_error(e.args[1])
 
-    def reset_password(self, user_username, new_password):
+    def reset_password(self, user_username: str, new_password: str) -> dict:
         """
         Reset user password from Google
         :param user_username:
@@ -155,7 +157,7 @@ class UserManager:
             self.db.rollback()
             raise UserErrorHandler.raise_server_error(e.args[0])
 
-    def get_user(self, current_user):
+    def get_user(self, current_user: User) -> dict:
         """
         Get user info by id
         :param current_user:
@@ -173,7 +175,7 @@ class UserManager:
             self.db.rollback()
             raise UserErrorHandler.raise_server_error(e.args[0])
 
-    def get_users(self, current_user):
+    def get_users(self, current_user: User) -> list[dict]:
         """
         Get users info by id
         :param current_user:
@@ -194,7 +196,7 @@ class UserManager:
             self.db.rollback()
             return UserErrorHandler.raise_server_error(e.args[0])
 
-    def update_user(self, current_user, user_data):
+    def update_user(self, current_user: User, user_data) -> dict:
         """
         Update user info
         :param current_user:
@@ -228,7 +230,7 @@ class UserManager:
             self.db.rollback()
             return UserErrorHandler.raise_server_error(e.args[0])
 
-    def delete_user(self, current_user):
+    def delete_user(self, current_user: User) -> Optional[dict]:
         """
         Delete user
         :param current_user:
