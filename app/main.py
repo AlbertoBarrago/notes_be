@@ -1,6 +1,8 @@
 """
  Main: Entry point for execution
 """
+from pathlib import Path
+
 from fastapi.staticfiles import StaticFiles
 
 from app.api.v1.endpoints import (
@@ -13,8 +15,9 @@ from app.api.v1.endpoints import (
 )
 from app.core.setup import create_app
 
+BASE_DIR = Path(__file__).resolve().parent.parent
 app = create_app()
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/static", StaticFiles(directory=BASE_DIR / "static"), name="static")
 
 app.include_router(healthcheck_router, tags=["Healthcheck"])
 app.include_router(home_router, tags=["home"])

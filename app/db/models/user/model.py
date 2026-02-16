@@ -5,13 +5,10 @@ import uuid
 from datetime import datetime
 
 import bcrypt
-from passlib.context import CryptContext
 from sqlalchemy import Column, String, DateTime
 from sqlalchemy.orm import relationship
 
 from app.db.models.base import Base
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 class User(Base):

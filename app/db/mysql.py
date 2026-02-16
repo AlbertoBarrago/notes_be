@@ -4,8 +4,8 @@ Dependency Utils
 import jwt
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
-from pymysql import OperationalError
 from sqlalchemy import create_engine
+from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import sessionmaker, Session
 
 from app.core.settings import settings
@@ -13,7 +13,7 @@ from app.db.models.user.model import User
 from app.repositories.logger.repository import LoggerService
 
 SQLALCHEMY_DATABASE_URL = (
-    f"mysql+pymysql://"
+    f"mysql+mysqlconnector://"
     f"{settings.MYSQL_USER}:"
     f"{settings.MYSQL_PASSWORD}"
     f"@{settings.MYSQL_HOST}"

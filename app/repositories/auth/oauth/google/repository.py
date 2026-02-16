@@ -4,8 +4,7 @@
 import secrets
 
 import requests
-from pymysql.err import MySQLError
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import DBAPIError, SQLAlchemyError
 
 from app.core import generate_user_token
 from app.core.exceptions.auth import AuthErrorHandler
@@ -146,8 +145,8 @@ async def add_user_to_db(db, request, background_tasks):
     except SQLAlchemyError as e:
         logger.error("Error adding user to database: %s", str(e))
         GlobalErrorHandler.raise_internal_server_error(str(e))
-    except MySQLError as e:
-        logger.error("MySQL error: %s", str(e))
+    except DBAPIError as e:
+        logger.error("Database driver error: %s", str(e))
         GlobalErrorHandler.raise_internal_server_error(str(e))
     except ValueError as e:
         logger.error("Validation error: %s", str(e))
