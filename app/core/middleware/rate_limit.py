@@ -1,5 +1,15 @@
 """
- Rate limit middleware
+  Custom Rate Limit Middleware
+  Provides the rate limiting functionality for API endpoints.
+
+  - Implemented as a Starlette BaseHTTPMiddleware
+  - Every request hits the middleware before reaching the router
+  - Identifier is either user:<username> (from JWT) or ip:<address> for
+  anonymous
+  - Counts are stored in a rate_limits table in MySQL with a time window
+  - Returns HTTP 429 when exceeded, and adds X-RateLimit-Limit,
+  X-RateLimit-Remaining, X-RateLimit-Reset headers to every response
+
 """
 from datetime import datetime, timedelta
 
@@ -29,7 +39,7 @@ def _get_or_create_rate_limit(identifier: str,
                               now: datetime,
                               window_start: datetime,
                               db) -> RateLimit:
-    """Get or create rate limit record"""
+    """Get or create the rate limit record"""
     rate_limit = db.query(RateLimit).filter(
         RateLimit.identifier == identifier,
         RateLimit.timestamp > window_start
