@@ -17,7 +17,7 @@ A production-ready FastAPI backend for a notes application, featuring JWT authen
 | **Password Reset** | Secure email-based flow via FastAPI-Mail + background tasks |
 | **BackOffice API** | Admin-only endpoints for managing users, notes, and audit records |
 | **Database** | MySQL with SQLAlchemy ORM and Alembic migrations |
-| **Caching** | LRU in-memory cache on note queries |
+| **Caching** | LRU in-memory cache on note queries (Redis is the natural upgrade for multi-instance deployments) |
 
 ---
 
@@ -43,21 +43,21 @@ HTTP Request
 ┌─────────────────────────────────┐
 │   API Endpoints (app/api/)      │  Route handlers — thin, no business logic
 │   auth · notes · users · oauth  │
-│   backoffice · healthcheck       │
+│   backoffice · healthcheck      │
 └────────────────┬────────────────┘
                  │
                  ▼
 ┌─────────────────────────────────┐
-│   Managers / Repositories       │  Business logic, dispatchers, caching
-│   (app/repositories/)           │
-│   NoteManager · UserManager     │
-│   LoginManager · BackofficeManager│
+│ Managers / Repositories         │  Business logic, dispatchers, caching
+│ (app/repositories/)             │
+│ NoteManager · UserManager       │
+│ LoginManager · BackofficeManager│
 └────────────────┬────────────────┘
                  │
                  ▼
 ┌─────────────────────────────────┐
-│   Database Layer (app/db/)      │  SQLAlchemy ORM models, session, JWT decode
-│   User · Note · Audit · RateLimit│
+│  Database Layer (app/db/)       │  SQLAlchemy ORM models, session, JWT decode
+│  User · Note · Audit · RateLimit│
 └─────────────────────────────────┘
 ```
 
