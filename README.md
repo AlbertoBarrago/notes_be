@@ -1,4 +1,4 @@
-# notes-be
+# notes_be
 
 A production-ready FastAPI backend for a notes application, featuring JWT authentication, Google OAuth, role-based access control, rate limiting, audit logging, and email-based password reset.
 
