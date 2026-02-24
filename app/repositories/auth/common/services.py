@@ -19,8 +19,16 @@ class CommonService:
     """
 
     def __init__(self, db=None):
-        self.email_service = EmailService()
+        self._email_service = None
         self.db = db
+
+    @property
+    def email_service(self):
+        """Lazy-initialise EmailService so missing MAIL_FROM doesn't break
+        callers that never send email (e.g. get_user, log_action)."""
+        if self._email_service is None:
+            self._email_service = EmailService()
+        return self._email_service
 
     async def send_email(self, background_tasks: BackgroundTasks, token: str, user) -> None:
         """

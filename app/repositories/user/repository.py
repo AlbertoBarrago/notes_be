@@ -28,7 +28,15 @@ class UserManager:
 
     def __init__(self, db: Session):
         self.db = db
-        self.email_service = EmailService()
+        self._email_service = None
+
+    @property
+    def email_service(self):
+        """Lazy-initialise EmailService so missing MAIL_FROM doesn't break
+        callers that never send email (e.g. token refresh, get_user)."""
+        if self._email_service is None:
+            self._email_service = EmailService()
+        return self._email_service
 
     def _get_user(
             self, user_id: Optional[str] = None, username: Optional[str] = None) -> Optional[User]:
