@@ -3,6 +3,8 @@
 """
 from pathlib import Path
 
+import uvicorn
+
 from fastapi.staticfiles import StaticFiles
 
 from app.api.v1.endpoints import (
@@ -32,3 +34,6 @@ app.include_router(
     notes_router, prefix="/api/v1/notes", tags=["Notes"])
 app.include_router(
     backoffice_router, prefix="/api/v1/backoffice", tags=["BackOffice"])
+
+if __name__ == "__main__":
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8080, reload=True)
