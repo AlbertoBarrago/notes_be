@@ -68,7 +68,7 @@ class EmailService:
                         style="background-color: #007bff;
                         color: white;
                         padding: 12px 25px;
-                        text-decoration: none; 
+                        text-decoration: none;
                         border-radius: 5px; font-weight: bold;">
                             Start Using Notes App
                         </a>
@@ -111,7 +111,7 @@ class EmailService:
                    </p>
 
                    <p style="color: #555; font-size: 16px; line-height: 1.5;">
-                       Thanks for registering with Google OAuth! To ensure full access to all Notes App features, 
+                       Thanks for registering with Google OAuth! To ensure full access to all Notes App features,
                        please set up your password by clicking the button below:
                    </p>
 
