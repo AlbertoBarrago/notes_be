@@ -38,7 +38,8 @@ class PasswordManager:
                         (User.email == username))
                 .first())
 
-    def send_password_reset_email(self, token: str, username: str, background_tasks: BackgroundTasks) -> Optional[dict]:
+    def send_password_reset_email(
+            self, token: str, username: str, background_tasks: BackgroundTasks) -> Optional[dict]:
         """
         Send password reset email
         :param token:
@@ -87,7 +88,8 @@ class PasswordManager:
             GlobalErrorHandler.raise_mail_reset_not_sent()
             return None
 
-    def initiate_password_reset(self, email: str, background_tasks: BackgroundTasks) -> Optional[dict]:
+    def initiate_password_reset(
+            self, email: str, background_tasks: BackgroundTasks) -> Optional[dict]:
         """
         Initiates a password reset process by generating a reset token and
         sending an email to the user if they exist.

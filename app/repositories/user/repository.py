@@ -30,7 +30,8 @@ class UserManager:
         self.db = db
         self.email_service = EmailService()
 
-    def _get_user(self, user_id: Optional[str] = None, username: Optional[str] = None) -> Optional[User]:
+    def _get_user(
+            self, user_id: Optional[str] = None, username: Optional[str] = None) -> Optional[User]:
         """
         Get user from a database
         """

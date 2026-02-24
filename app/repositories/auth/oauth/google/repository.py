@@ -142,11 +142,11 @@ async def add_user_to_db(db, request, background_tasks):
                                              user=user)
 
             return result
-    except SQLAlchemyError as e:
-        logger.error("Error adding user to database: %s", str(e))
-        GlobalErrorHandler.raise_internal_server_error(str(e))
     except DBAPIError as e:
         logger.error("Database driver error: %s", str(e))
+        GlobalErrorHandler.raise_internal_server_error(str(e))
+    except SQLAlchemyError as e:
+        logger.error("Error adding user to database: %s", str(e))
         GlobalErrorHandler.raise_internal_server_error(str(e))
     except ValueError as e:
         logger.error("Validation error: %s", str(e))
