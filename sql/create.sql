@@ -1,59 +1,73 @@
-CREATE DATABASE notez_be;
+-- =============================================================================
+-- create.sql
+-- Full schema for the notez_be database.
+-- Run once on a fresh MySQL instance (or after drop.sql).
+-- Usage:  mysql -u root -p < sql/create.sql
+-- =============================================================================
+
+CREATE DATABASE IF NOT EXISTS notez_be
+    CHARACTER SET utf8mb4
+    COLLATE utf8mb4_unicode_ci;
+
 USE notez_be;
 
--- Users Table
-CREATE TABLE users
+-- -----------------------------------------------------------------------------
+-- users
+-- -----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS users
 (
-    id              VARCHAR(36) PRIMARY KEY,
-    username        VARCHAR(50) UNIQUE  NOT NULL,
+    id              VARCHAR(36)  PRIMARY KEY,
+    username        VARCHAR(50)  UNIQUE NOT NULL,
     email           VARCHAR(100) UNIQUE NOT NULL,
-    picture_url     VARCHAR(255),
+    picture_url     VARCHAR(255)        NULL,
     hashed_password VARCHAR(255)        NOT NULL,
-    created_at      TIMESTAMP                    DEFAULT CURRENT_TIMESTAMP,
-    updated_at      TIMESTAMP                    DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    role            VARCHAR(50)         NOT NULL DEFAULT 'GUEST'
+    created_at      DATETIME            NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at      DATETIME            NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    role            VARCHAR(50)         NOT NULL DEFAULT 'GUEST',
+    INDEX ix_users_username (username),
+    INDEX ix_users_email    (email)
 );
 
--- Audit Table
-CREATE TABLE audit
+-- -----------------------------------------------------------------------------
+-- notes
+-- -----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS notes
 (
-    id          SERIAL PRIMARY KEY,
-    user_id     VARCHAR(36) NOT NULL,
-    action      VARCHAR(50) NOT NULL,
-    description TEXT,
-    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT fk_user_audit FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE
+    id         INT          NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id    VARCHAR(36)  NOT NULL,
+    title      VARCHAR(100) NOT NULL,
+    content    TEXT         NOT NULL,
+    created_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME         NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    is_public  BOOLEAN          NULL DEFAULT FALSE,
+    tags       JSON             NULL,
+    image_url  VARCHAR(255)     NULL,
+    INDEX ix_notes_id (id),
+    CONSTRAINT fk_notes_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
 
--- Notes Table
-CREATE TABLE notes
+-- -----------------------------------------------------------------------------
+-- audit
+-- -----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS audit
 (
-    id         SERIAL PRIMARY KEY,
-    user_id    VARCHAR(36)                                                     NOT NULL,
-    title      VARCHAR(100)                                                    NOT NULL,
-    content    TEXT                                                            NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP                             NOT NULL,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL,
-    is_public  BOOLEAN   DEFAULT false,
-    tags       JSON,
-    image_url  VARCHAR(255),
-    CONSTRAINT fk_user_notes FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+    id          INT          NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    user_id     VARCHAR(36)  NOT NULL,
+    action      VARCHAR(255) NOT NULL,
+    description VARCHAR(255)     NULL,
+    timestamp   DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_audit_user FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
 
--- Auth Table
-CREATE TABLE auth
+-- -----------------------------------------------------------------------------
+-- rate_limits
+-- -----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS rate_limits
 (
-    id         SERIAL PRIMARY KEY,
-    identifier VARCHAR(36) UNIQUE NOT NULL,
-    requests   INT       DEFAULT 0,
-    timestamp  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE rate_limits
-(
-    id         INT PRIMARY KEY AUTO_INCREMENT,
-    identifier VARCHAR(36) UNIQUE NOT NULL,
-    requests   INT       DEFAULT 0,
-    timestamp  TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    id         INT          NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    identifier VARCHAR(255)     NULL,
+    requests   INT              NULL DEFAULT 0,
+    timestamp  DATETIME         NULL,
+    INDEX ix_rate_limits_id         (id),
+    INDEX ix_rate_limits_identifier (identifier)
 );
