@@ -5,7 +5,7 @@ from datetime import datetime
 
 from sqlalchemy import Column, String, Integer, DateTime
 
-from app.db.models import Base
+from app.db.models.base import Base
 
 
 class RateLimit(Base):
