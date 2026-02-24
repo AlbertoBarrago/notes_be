@@ -2,6 +2,7 @@
     Auth Endpoint
 """
 from fastapi import APIRouter, Depends, Form, BackgroundTasks
+from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
 from app.db.models import User
@@ -17,6 +18,7 @@ from app.schemas.common.responses import CommonResponses
 from app.schemas.user.request import ResetPswRequest
 
 router = APIRouter()
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/swagger")
 
 
 @router.post("/auth/login",
@@ -117,6 +119,21 @@ async def refresh_token(current_user: User = Depends(get_current_user),
     return await UserManager(db).perform_action_user(
         "generate_user_token_and_return_user",
         current_user=current_user)
+
+
+@router.post("/auth/logout",
+             responses={**CommonResponses.UNAUTHORIZED})
+def logout(
+        token: str = Depends(oauth2_scheme),
+        current_user: User = Depends(get_current_user),  # pylint: disable=unused-argument
+        db: Session = Depends(get_db)
+):
+    """
+    Invalidates the current access token so it cannot be reused.
+    The token's jti is stored in the revoked_tokens blacklist until it
+    naturally expires, after which it is purged automatically.
+    """
+    return LoginManager(db).perform_action_auth("logout", token=token)
 
 
 @router.post("/auth/reset",

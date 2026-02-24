@@ -9,6 +9,7 @@ from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import sessionmaker, Session
 
 from app.core.settings import settings
+from app.db.models.auth.model import RevokedToken
 from app.db.models.user.model import User
 from app.repositories.logger.repository import LoggerService
 
@@ -57,6 +58,11 @@ def get_current_user(token: str = Depends(oauth2_scheme),
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         user_id: str = payload.get("sub")
+        jti: str = payload.get("jti")
+
+        if jti and db.query(RevokedToken).filter(RevokedToken.jti == jti).first():
+            raise HTTPException(status_code=401, detail="Token has been revoked")
+
         user = db.query(User).filter(User.id == user_id).first()
 
         if user is None:

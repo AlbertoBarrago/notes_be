@@ -1,12 +1,16 @@
 """
 Session actions
 """
+from datetime import datetime
 from typing import Optional
 
+import jwt
 from sqlalchemy.orm import Session
 
 from app.core.exceptions.auth import AuthErrorHandler
 from app.core.security import generate_user_token_and_return_user
+from app.core.settings import settings
+from app.db.models.auth.model import RevokedToken
 from app.repositories.auth.common.services import CommonService
 from app.repositories.logger.repository import LoggerService
 
@@ -62,6 +66,33 @@ class LoginManager:
 
         return generate_user_token_and_return_user(user)
 
+    def logout(self, token: str) -> dict:
+        """
+        Revoke a JWT by storing its jti in the blacklist.
+        Also purges any already-expired rows to keep the table lean.
+        :param token: raw Bearer token string
+        :return: confirmation message
+        """
+        try:
+            payload = jwt.decode(
+                token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
+            )
+            jti = payload.get("jti")
+            exp = payload.get("exp")
+
+            if jti:
+                expires_at = datetime.fromtimestamp(exp)
+                self.db.add(RevokedToken(jti=jti, expires_at=expires_at))
+                # Clean up tokens that have already expired naturally
+                self.db.query(RevokedToken).filter(
+                    RevokedToken.expires_at < datetime.now()
+                ).delete()
+                self.db.commit()
+
+            return {"message": "Logged out successfully"}
+        except jwt.PyJWTError:
+            return AuthErrorHandler.raise_invalid_token()
+
     def perform_action_auth(self, action: str, request=None, **kwargs) -> Optional[dict]:
         """
         Perform action authorization
@@ -75,3 +106,5 @@ class LoginManager:
                 return self.login(request, oauth=kwargs.get('oauth', False))
             case "swagger_login":
                 return self.swagger_login(kwargs.get('username'), kwargs.get('password'))
+            case "logout":
+                return self.logout(kwargs.get('token'))

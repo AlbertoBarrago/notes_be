@@ -13,6 +13,7 @@ just forward every request unchanged.
 
 A real SQLite in-memory database is created for the actual test logic.
 """
+# pylint: disable=redefined-outer-name  # standard pytest fixture injection pattern
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -35,7 +36,7 @@ with patch("sqlalchemy.create_engine", return_value=_mock_engine):
 #    The middleware's __init__ already captured the mock SessionLocal; patching
 #    the class method means all existing instances use the new dispatch too.
 # ---------------------------------------------------------------------------
-from app.core.middleware.rate_limit import RateLimitMiddleware  # noqa: E402
+from app.core.middleware.rate_limit import RateLimitMiddleware  # noqa: E402  # pylint: disable=wrong-import-position
 
 
 async def _noop_dispatch(self, request, call_next):  # pylint: disable=unused-argument
@@ -47,8 +48,8 @@ RateLimitMiddleware.dispatch = _noop_dispatch
 # ---------------------------------------------------------------------------
 # 3. Real test database — SQLite in-memory, same schema as production.
 # ---------------------------------------------------------------------------
-from app.db.models import Base          # noqa: E402
-from app.db.models.user.model import User  # noqa: E402
+from app.db.models import Base          # noqa: E402  # pylint: disable=wrong-import-position
+from app.db.models.user.model import User  # noqa: E402  # pylint: disable=wrong-import-position
 
 _TEST_ENGINE = create_engine(
     "sqlite:///:memory:",
@@ -125,3 +126,21 @@ def client(db_session, test_user):
         yield tc
 
     app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def client_real_auth(db_session):
+    """
+    Like ``client`` but does NOT override ``get_current_user``, so the real
+    JWT decode and blacklist check in ``get_current_user`` run.
+    Use for tests that need to verify token revocation.
+    """
+    def override_get_db():
+        yield db_session
+
+    app.dependency_overrides[get_db] = override_get_db
+
+    with TestClient(app) as tc:
+        yield tc
+
+    app.dependency_overrides.pop(get_db, None)

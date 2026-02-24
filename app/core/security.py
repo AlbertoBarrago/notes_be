@@ -1,6 +1,7 @@
 """
 Access Token
 """
+import uuid
 from datetime import datetime, timedelta
 
 import jwt
@@ -20,7 +21,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None) -> s
     expire = datetime.now() + (expires_delta or timedelta(
         minutes=int(settings.TOKEN_EXPIRES_MINUTES)
     ))
-    to_encode.update({"exp": expire, "sub": data.get("sub")})
+    to_encode.update({"exp": expire, "sub": data.get("sub"), "jti": str(uuid.uuid4())})
     encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     return encoded_jwt
 

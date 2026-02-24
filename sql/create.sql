@@ -74,3 +74,15 @@ CREATE TABLE IF NOT EXISTS rate_limits
     INDEX ix_rate_limits_id         (id),
     INDEX ix_rate_limits_identifier (identifier)
 );
+
+-- -----------------------------------------------------------------------------
+-- revoked_tokens  (JWT blacklist — enables logout before natural expiry)
+-- -----------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS revoked_tokens
+(
+    id         INT          NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    jti        VARCHAR(36)  NOT NULL UNIQUE,
+    expires_at DATETIME     NOT NULL,
+    revoked_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX ix_revoked_tokens_jti (jti)
+);
