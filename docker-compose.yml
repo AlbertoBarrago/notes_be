@@ -1,0 +1,41 @@
+services:
+
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: notez_be
+      MYSQL_USER: notez_app
+      MYSQL_PASSWORD: notez_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./sql/create.sql:/docker-entrypoint-initdb.d/01_create.sql   # runs on first start
+      - ./sql/seed.sql:/docker-entrypoint-initdb.d/02_seed.sql       # runs on first start
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  app:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    environment:
+      MYSQL_HOST: db:3306         # overrides .env so the app reaches the db container
+    command: >
+      sh -c ".venv/bin/alembic upgrade head &&
+             .venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  mysql_data:
