@@ -21,7 +21,7 @@ def create_app() -> FastAPI:
             "email": "albertobarrago@gmail.com",
         },
         description="An API for creating and managing notes",
-        version="1.2.0",
+        version="1.2.1",
         license_info={
             "name": "MIT License",
             "url": "https://opensource.org/licenses/MIT",

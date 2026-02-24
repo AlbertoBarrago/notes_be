@@ -1,6 +1,6 @@
 [project]
 name = "albz-notes-be"
-version = "1.2.0"
+version = "1.2.1"
 description = "FastAPI backend for a notes application with JWT authentication"
 requires-python = ">=3.12"
 dependencies = [
